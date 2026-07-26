@@ -37,38 +37,52 @@ window.HLJQ_DATA = (function () {
   };
 
   /* ---------- 人物（真实设定；姓名已抹，仅代号/标签；王鉴身份不暴露） ---------- */
-  /* age：用于在检索简介中透露年龄（玩家据此推生辰）。deceased 不在常态标，终局由头条揭露。 */
+  /* wechat：论坛账号；birthday：密码 = 真名 + 年干支（玩家自行推算）。deceased 由头条揭露。 */
   const PEOPLE = {
     "刘希夷": {
       alias: ["朽孽翁", "希夷"], tag: "本门 · 法官", age: 18, img: IMG + "liu-xiyi.png",
+      wechat: "xuanlei_xiyi",
+      birthday: { stemBranch: "戊子", year: 2008, zodiac: "鼠" },
       line: "十八岁，南阳守玄雷坛传承弟子，北帝酆岳派法官，号朽孽翁。稍胖壮，长发，常捏着冰爆珠烟压惊。",
     },
     "王付岩": {
       alias: ["度师"], tag: "已故 · 师脉", age: null, img: IMG + "wang-fuyan.png",
+      wechat: "shifu_wang_fy",
       line: "刘希夷的度师，三年前病逝。临终将守玄雷坛坛脉真火封存于人身造化最后一洞。",
     },
     "王鉴": {
       alias: [], tag: "暗线 · 来历不明", age: null, img: IMG + "wang-jian.png",
+      wechat: "jiander_wj",
       line: "刘希夷租住老宅楼下的修车师傅，中年人。话不多，常深夜在坛场门外，出手方式不属任何已知门派。",
     },
     "麻三": {
       alias: ["路遥", "麻红福"], tag: "同道 · 巴代", age: 20, img: IMG + "ma-san.png",
+      wechat: "badai_ma_luyao",
+      birthday: { stemBranch: "丙戌", year: 2006, zodiac: "狗" },
       line: "二十岁，苗族青年，家传元皇巴代法（法名麻法虎），贵州铜仁松桃梅沼村人，现居福建。瘦，爷爷传下的法脉已逝三年。",
     },
     "孙师": {
       alias: ["千寻"], tag: "同道 · 灵宝", age: 20, img: IMG + "sun-shi.png",
+      wechat: "lingbao_qianxun",
+      birthday: { stemBranch: "丙戌", year: 2006, zodiac: "狗" },
       line: "二十岁，网名千寻，刘希夷称其师傅。主灵宝斋醮科仪、度亡炼度。瘦，长发，原大连人，迁居重庆。",
     },
     "贾生": {
       alias: ["王范家传"], tag: "同道 · 西河铁师", age: 23, img: IMG + "jia-sheng.png",
+      wechat: "wangfjia_uber",
+      birthday: { stemBranch: "癸未", year: 2003, zodiac: "羊" },
       line: "二十三岁，原名王范家传，学西北西河铁师法，主将王灵官。四川人，现于杭州跑滴滴谋生。",
     },
     "迟浩亮": {
       alias: [], tag: "同道 · 奇门风水", age: 22, img: IMG + "chi-haoliang.png",
+      wechat: "qimen_chi",
+      birthday: { stemBranch: "甲申", year: 2004, zodiac: "猴" },
       line: "二十二岁，辽宁大连人，在苏州经营奇门风水工作室。只学奇门遁甲与风水堪舆，不学道法科仪。",
     },
     "沈佳诚": {
       alias: ["桐凤斋"], tag: "同道 · 开面符", age: 18, img: IMG + "shen-jiacheng.png",
+      wechat: "tfc_jiacheng",
+      birthday: { stemBranch: "戊子", year: 2008, zodiac: "鼠" },
       line: "十八岁，网名桐凤斋，浙江嘉兴人。主桐乡开面符＋江南清微，今年刚高考完，准备去杭州中国美院。",
     },
     "黑律叛师": {
@@ -242,6 +256,9 @@ window.HLJQ_DATA = (function () {
         { from: "A", text: "刘哥，我高铁票订了，后日到南阳。巴代法器我都带上了——墨符册、师刀、法衣。" },
         { from: "我", text: "一路小心。到了先歇脚，莫急着上坛。你才二十，别硬扛。" },
         { from: "A", text: "放心。爷爷说过，请神不是冲，是稳。我护外围，你主攻，错不了。" },
+        { from: "A", text: "（深夜）刘哥，论坛上有点线索。我把 WeChat 发你：badai_ma_luyao。你登上看。" },
+        { from: "我", text: "密码呢？" },
+        { from: "A", text: "你自己想。真名，加上生辰年干支，就是密码。这事我不能说破。" },
       ], photo: IMG + "media-3.png" },
     { with: "B", name: "B", img: IMG + "sun-shi.png", age: 20,
       msgs: [
@@ -306,8 +323,75 @@ window.HLJQ_DATA = (function () {
       text: "三地均有『精神崩溃』『异响』『黑影』相关零散帖文，出现后多被快速删除。IP 分布显示，相关群组成员遍及南阳、信阳、驻马店、平顶山，乃至洛阳、郑州。" },
     { src: "浙江嘉兴 · 读者投稿", tag: "投稿",
       title: "沈某投稿：我有点小道消息",
-      text: "我是嘉兴的，跟前面那位刘哥学过开面符。我不敢说太多，但我手里有点小道消息——你们要找的那五个，生辰是锁。\n刘某（南阳那个）戊子年生；麻谋丙戌；孙谋也是丙戌；王某癸未；迟某甲申。属相嘛，鼠、狗、狗、羊、猴。\n他们不是自己跳下去的。谁在收？你们要是查到那一步，自然懂。我把这话说出来，剩下的，看你们。" },
+      text: "我是嘉兴的，跟前面那位刘哥学过开面符。我不敢说太多。\n你们要找的那五个，他们生辰属相是：鼠、狗、狗、羊、猴。剩下的，你们自己去查——这部手机里，有他们的资料。\n我是活下来的人。我把话说到这里，剩下的，看你们。" },
   ];
+
+  /* ---------- 论坛（路遥提示刘希夷前往查线索） ---------- */
+  /* 账号 = WeChat ID；密码 = 真名 + 生辰年干支。玩家需自行推算。 */
+  const FORUM = {
+    title: "同道论坛",
+    subtitle: "妙林斋 · 道门杂谈 · 匿名",
+    loginHint: "登录：WeChat 账号 + 密码（真名 + 生辰年干支）",
+    members: [
+      { wechat: "xuanlei_xiyi",   name: "朽孽翁",   realName: "刘希夷" },
+      { wechat: "badai_ma_luyao", name: "巴代路遥", realName: "麻三" },
+      { wechat: "lingbao_qianxun",name: "灵宝千寻", realName: "孙师" },
+      { wechat: "wangfjia_uber",  name: "西河老贾", realName: "贾生" },
+      { wechat: "qimen_chi",      name: "奇门迟",   realName: "迟浩亮" },
+      { wechat: "tfc_jiacheng",   name: "桐凤斋",   realName: "沈佳诚" },
+      { wechat: "jiander_wj",     name: "修车师傅", realName: "王鉴" },
+    ],
+    threads: [
+      {
+        id: "t1",
+        title: "梅沼矿洞那处的地气，谁改的？",
+        author: "奇门迟",
+        authorWechat: "qimen_chi",
+        time: "二月廿四 · 子时",
+        replies: 8,
+        posts: [
+          { wechat: "qimen_chi",       who: "奇门迟",   time: "二月廿四 · 子时",
+            text: "铜仁方向，地气被人为改了。散风放煞，是逆转风水的布法。这局至少布了三年。懂行的兄弟看看，怎么复原。" },
+          { wechat: "badai_ma_luyao",  who: "巴代路遥", time: "二月廿四 · 丑时",
+            text: "梅沼村那矿洞我从小就知道，爷爷说过不干净。洞里深处应该还有阵眼。地气一散，外围的活物都会跟着乱。" },
+          { wechat: "wangfjia_uber",   who: "西河老贾", time: "二月廿五 · 辰时",
+            text: "从大处看——他不只是改了一处地气，是在多处同时改。像是同时布了几个灶。" },
+          { wechat: "xuanlei_xiyi",    who: "朽孽翁",   time: "二月廿五 · 午时",
+            text: "一城一城地收，像榨油。这是我的判词。诸君，请查周边——南阳、信阳、驻马店。" },
+          { wechat: "tfc_jiacheng",    who: "桐凤斋",   time: "二月廿六 · 晨",
+            text: "各位，我画了五张开面符，贴在受害人家中。朱砂填实，将帅开了面，邪法就遮不住。符还没寄出，我先发图大家看看。" },
+        ],
+      },
+      {
+        id: "t2",
+        title: "【转载】驻马店某高校大三学生坠楼，眉心黑印",
+        author: "巴代路遥",
+        authorWechat: "badai_ma_luyao",
+        time: "三月十一 · 子时",
+        replies: 5,
+        posts: [
+          { wechat: "badai_ma_luyao", who: "巴代路遥", time: "三月十一 · 子时",
+            text: "我贴一个旧闻。驻马店某高校大三学生坠楼，落地跪着，眉心黑印。三个月前的。这不是个案。" },
+          { wechat: "lingbao_qianxun",who: "灵宝千寻", time: "三月十一 · 丑时",
+            text: "落地的跪姿是法印——把魂锁死在身子里，连散都散不掉。这种程度，是系统性收割。" },
+          { wechat: "xuanlei_xiyi",   who: "朽孽翁",   time: "三月十一 · 寅时",
+            text: "我把范围扩大到南阳周边，又挖到信阳、平顶山、洛阳、郑州，都有零散帖——多被删。他铺得很广，我们不能只守一城。" },
+        ],
+      },
+      {
+        id: "t3",
+        title: "（仅一帖）嘉兴消息",
+        author: "桐凤斋",
+        authorWechat: "tfc_jiacheng",
+        time: "三月初六 · 申时",
+        replies: 1,
+        posts: [
+          { wechat: "tfc_jiacheng",   who: "桐凤斋",   time: "三月初六 · 申时",
+            text: "各位前辈。我跟刘哥学过开面符。论坛上有些事我不敢多说。我只能说——属相加上年纪，就是答案。剩下的路，你们自己走。我还活着。" },
+        ],
+      },
+    ],
+  };
 
   /* ---------- 终局头条（五男跳楼 · 跪拜 · 眉心黑印） ---------- */
   /* 读完伏笔笔记（n=22）即弹出。死者以匿名代号示人，与群聊 A–E 互证。 */
@@ -322,17 +406,17 @@ window.HLJQ_DATA = (function () {
     tip: "浙江嘉兴一位沈某向本报投稿，称『有点小道消息』，未肯详述。",
   };
 
-  /* ---------- 真相锁（五人生辰年干年支） ---------- */
-  /* 答案藏于沈某投稿。输入顺序对应 names。容错：去空格、转全角→半角、忽略大小写。 */
+  /* ---------- 真相锁（五人生辰年干支） ---------- */
+  /* 答案藏于沈某投稿 + 论坛沈某帖 + 玩家自行推算。容错：去空格、转全角→半角、忽略大小写。 */
   const TRUTH = {
-    prompt: "以五人的生辰年干年支，解锁刘希夷拼出的真相。",
-    hint: "生辰的线索，在『新闻 · 沈某投稿』里。属相：鼠、狗、狗、羊、猴。",
+    prompt: "以五人的生辰年干支，解锁刘希夷拼出的真相。",
+    hint: "线索在『新闻 · 沈某投稿』与论坛里。生辰 = 真名 + 年干支。",
     fields: [
-      { key: "刘某", age: 18, placeholder: "如 戊子" },
-      { key: "麻谋", age: 20, placeholder: "如 丙戌" },
-      { key: "孙谋", age: 20, placeholder: "如 丙戌" },
-      { key: "王某", age: 23, placeholder: "如 癸未" },
-      { key: "迟某", age: 22, placeholder: "如 甲申" },
+      { key: "刘某", age: 18 },
+      { key: "麻谋", age: 20 },
+      { key: "孙谋", age: 20 },
+      { key: "王某", age: 23 },
+      { key: "迟某", age: 22 },
     ],
     answers: ["戊子", "丙戌", "丙戌", "癸未", "甲申"],
     reveal:
@@ -349,5 +433,5 @@ window.HLJQ_DATA = (function () {
     foretellNote: 22,   // 读完此笔记即弹头条
   };
 
-  return { META, LUOSHU, PEOPLE, LORE, REACTIVE_KEYS, REACTIVE, WANGJIAN, QUESTS, DAILY_NOTES, GROUP_CHATS, PRIVATE_MSGS, MOMENTS, NEWS, HEADLINE, TRUTH, DEATH };
+  return { META, LUOSHU, PEOPLE, LORE, REACTIVE_KEYS, REACTIVE, WANGJIAN, QUESTS, DAILY_NOTES, GROUP_CHATS, PRIVATE_MSGS, MOMENTS, NEWS, HEADLINE, FORUM, TRUTH, DEATH };
 })();

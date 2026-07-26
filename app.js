@@ -21,7 +21,7 @@
     save(o) { const cur = this.load(); localStorage.setItem(KEY, JSON.stringify(Object.assign(cur, o))); },
   };
   let S = Object.assign(
-    { qa: false, qb: false, qc: false, read: [], wj: [], wjUnread: 0, audio: false, fx: true, bled: [], death: false, truth: false },
+    { qa: false, qb: false, qc: false, read: [], wj: [], wjUnread: 0, audio: false, fx: true, bled: [], death: false, truth: false, bkShown: false, shenRead: false, wjProtectDismissed: [], forumUser: null },
     store.load()
   );
 
@@ -183,6 +183,8 @@
    *  读完伏笔笔记（n=22）即弹出：先屏幕破碎+晃动+出血，再落头条新闻卡。
    * ===================================================================== */
   function buildBreaking(perform) {
+    // 已展示过一次 / 真相已解 → 不再弹（避免每页加载反复闪屏）
+    if (S.bkShown || S.truth) return;
     const H = D.HEADLINE;
     const overlay = document.createElement("div");
     overlay.id = "breaking";
@@ -196,11 +198,12 @@
         '<p class="bk-tip">' + (H.tip || "") + "</p>" +
         '<div class="bk-actions">' +
           '<button id="bkShare" type="button">分享这部手机</button>' +
-          '<button id="bkTruth" type="button">拼出真相 →</button>' +
           '<button id="bkClose" type="button" class="ghost">再看一眼</button>' +
         "</div>" +
       "</div>";
     document.body.appendChild(overlay);
+
+    S.bkShown = true; store.save({ bkShown: true });
 
     const motion = S.fx && !reduceMotion;
     if (motion) { overlay.classList.add("shake"); screenShatter(); }
@@ -210,16 +213,44 @@
     function finish() {
       fireWJ("finale");
       const share = document.getElementById("bkShare");
-      const truth = document.getElementById("bkTruth");
       const close = document.getElementById("bkClose");
       if (share) share.onclick = () => doShare(
         (D.META && D.META.title) + "\n" + H.title + "\n——一部无人认领的手机里，藏着这件事的另一端。");
-      if (truth) truth.onclick = () => { location.href = "truth.html"; };
       if (close) close.onclick = () => overlay.remove();
     }
     if (perform) setTimeout(finish, reduceMotion ? 2200 : 5200);
     else finish();
     return overlay;
+  }
+  /* =====================================================================
+   *  王鉴保护弹窗（iOS 通知式；同一 UI 浮层；点击 → msgs.html）
+   *  检索死者后自动弹出，保护玩家不再陷。
+   * ===================================================================== */
+  const WJ_PROTECT_TEXT = "别再查了。他们已经死了。继续只会让你陷得更深。\n去讯息里看完我说的，再回来。";
+  const WJ_FIVE = ["刘希夷", "麻三", "孙师", "贾生", "迟浩亮"];
+  function maybeShowWangjianProtect(personKey) {
+    if (S.truth) return; // 真相已解，无需保护
+    if (!WJ_FIVE.includes(personKey)) return;
+    if (S.wjProtectDismissed.indexOf(personKey) >= 0) return;
+    S.wjProtectDismissed.push(personKey);
+    store.save({ wjProtectDismissed: S.wjProtectDismissed });
+    showWangjianProtectModal();
+  }
+  function showWangjianProtectModal() {
+    if (document.getElementById("wj-protect-modal")) return;
+    const modal = document.createElement("div");
+    modal.id = "wj-protect-modal";
+    modal.className = "wj-protect-modal";
+    modal.setAttribute("role", "button");
+    modal.innerHTML =
+      '<div class="wj-protect-card">' +
+        '<div class="wj-protect-head"><span class="wj-protect-from">修车师傅</span><span class="wj-protect-meta">讯息</span></div>' +
+        '<div class="wj-protect-text">' + WJ_PROTECT_TEXT + "</div>" +
+        '<div class="wj-protect-action">[ 点击查看完整对话 → ]</div>' +
+      "</div>";
+    modal.onclick = () => { location.href = "msgs.html"; };
+    document.body.appendChild(modal);
+    if (S.audio) { ensureAudio(); sting(1); }
   }
   function showJuebi() {
     const m = D.WANGJIAN.find((x) => x.trigger === "finale");
@@ -321,6 +352,7 @@
           log("检索人物：" + personKey);
           const isFoe = !!(personHit.foe || (personHit.tag && personHit.tag.indexOf("反派") >= 0));
           if (isFoe) horror(3);
+          maybeShowWangjianProtect(personKey);
           return;
         }
         if (D.REACTIVE_KEYS.some((k) => kw.includes(k) || k.includes(kw))) {
@@ -600,63 +632,206 @@
 
   /* =====================================================================
    *  新闻流（残存于回收手机；含沈某投稿）
+   *  v6：去掉「拼出真相」按钮；改由沈某投稿末尾「已阅 · 继续」触发真相浮窗。
    * ===================================================================== */
   function renderNews() {
-    const items = (D.NEWS || []).map((n) =>
-      `<div class="news-item">
+    const items = (D.NEWS || []).map((n, idx) => {
+      const isShen = idx === (D.NEWS.length - 1);
+      const continueBtn = isShen
+        ? '<div class="news-sentinel"><button class="news-continue" id="shenContinue" type="button">已阅 · 继续 →</button></div>'
+        : "";
+      return `<div class="news-item">
         <div class="news-src">${n.src}<span class="news-tag">${n.tag || ""}</span></div>
         <h4 class="news-title">${n.title}</h4>
-        <p class="news-text">${n.text}</p>
-      </div>`).join("");
-    const hint = `<p class="news-hint muted">沈某的投稿里，藏着五人的生辰。那串干支，是解开「真相」的钥匙。</p>`;
-    showPage("新闻 · 残存剪报", `<div class="news-feed">${items}${hint}</div>`);
+        <p class="news-text">${n.text.replace(/\n/g, "<br/>")}</p>
+        ${continueBtn}
+      </div>`;
+    }).join("");
+    showPage("新闻 · 残存剪报", `<div class="news-feed">${items}</div>`, () => {
+      const btn = document.getElementById("shenContinue");
+      if (!btn) return;
+      btn.onclick = () => {
+        S.shenRead = true; store.save({ shenRead: true });
+        showTruthModal();
+      };
+    });
   }
 
   /* =====================================================================
-   *  真相锁（五人生辰年干年支）
+   *  真相浮窗（modal 弹出替代独立按钮 / 独立页）
+   *  触发：读完沈某投稿末尾 / 直接访问 truth.html
+   *  解出后 S.truth = true，不再出现（除非直接访问 truth.html 看答案）
    * ===================================================================== */
   function norm(s) { return (s || "").replace(/\s+/g, "").trim(); }
-  function renderTruth() {
-    if (S.truth) { showTruthReveal(); return; }
-    const flds = D.TRUTH.fields.map((f, i) =>
-      `<div class="truth-row">
-        <label>${f.key}${f.age != null ? " · 约" + f.age + "岁" : ""}</label>
-        <input class="truth-in" id="tk${i}" placeholder="${f.placeholder || ""}" autocomplete="off" />
-      </div>`).join("");
-    const html =
-      `<div class="truth-lock">
-        <p class="truth-prompt">${D.TRUTH.prompt}</p>
-        <p class="truth-hint muted">${D.TRUTH.hint}</p>
-        <div class="truth-fields">${flds}</div>
-        <button id="tkGo" type="button">解 锁</button>
-        <p class="truth-msg" id="tkMsg"></p>
-      </div>`;
-    showPage("真相 · 生辰锁", html, () => {
-      const go = $("#tkGo"), msg = $("#tkMsg");
-      go.addEventListener("click", () => {
-        const got = D.TRUTH.fields.map((_, i) => norm($("#tk" + i).value));
+  function showTruthModal() {
+    if (document.getElementById("truth-modal")) return;
+    const modal = document.createElement("div");
+    modal.id = "truth-modal";
+    modal.className = "truth-modal-overlay";
+
+    const card = document.createElement("div");
+    card.className = "truth-modal-card";
+
+    if (S.truth) {
+      card.innerHTML =
+        '<button class="truth-modal-close" type="button" aria-label="关闭">×</button>' +
+        '<div class="truth-modal-content">' +
+          '<div class="truth-seal">印 · 已解</div>' +
+          '<pre class="truth-text">' + D.TRUTH.reveal + '</pre>' +
+        '</div>';
+    } else {
+      const flds = D.TRUTH.fields.map((f, i) =>
+        '<div class="truth-row">' +
+          '<label>' + f.key + (f.age != null ? " · 约" + f.age + "岁" : "") + '</label>' +
+          '<input class="truth-in" id="tk' + i + '" autocomplete="off" />' +
+        '</div>').join("");
+      card.innerHTML =
+        '<button class="truth-modal-close" type="button" aria-label="关闭">×</button>' +
+        '<div class="truth-modal-content">' +
+          '<p class="truth-prompt">' + D.TRUTH.prompt + '</p>' +
+          '<p class="truth-hint muted">' + D.TRUTH.hint + '</p>' +
+          '<div class="truth-fields">' + flds + '</div>' +
+          '<button id="tkGo" type="button">解 锁</button>' +
+          '<p class="truth-msg" id="tkMsg"></p>' +
+        '</div>';
+    }
+    modal.appendChild(card);
+    document.body.appendChild(modal);
+
+    // 关闭
+    card.querySelector(".truth-modal-close").onclick = (e) => {
+      e.stopPropagation();
+      modal.remove();
+    };
+    // 点击遮罩关闭（仅未解出状态）
+    if (!S.truth) {
+      modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
+    }
+
+    if (!S.truth) {
+      card.querySelector("#tkGo").onclick = () => {
+        const got = D.TRUTH.fields.map((_, i) => norm(card.querySelector("#tk" + i).value));
         const ok = got.length === D.TRUTH.answers.length &&
           got.every((g, i) => g === norm(D.TRUTH.answers[i]));
         if (ok) {
           S.truth = true; store.save({ truth: true });
-          showTruthReveal();
+          horror(3);
+          modal.remove();
+          showTruthModal(); // 重新挂载，渲染「已解」版
         } else {
-          msg.className = "truth-msg err"; msg.textContent = "不对。生辰对不上。";
+          const m = card.querySelector("#tkMsg");
+          m.className = "truth-msg err"; m.textContent = "不对。生辰对不上。";
           horror(2);
         }
-      });
+      };
+    } else {
+      horror(3);
+    }
+  }
+
+  /* 直接访问 truth.html 时渲染浮窗（不渲染页面内容） */
+  function renderTruth() {
+    // 临时清空 pageBody 以让浮窗独占视口
+    const host = $("#pageBody"); if (host) host.innerHTML = "";
+    showTruthModal();
+  }
+
+  /* =====================================================================
+   *  论坛（路遥提示刘希夷前往查线索）
+   *  登录：WeChat 账号 + 密码（真名 + 生辰年干支）
+   * ===================================================================== */
+  function forumCheckLogin(user, pass) {
+    const member = (D.FORUM.members || []).find((m) => m.wechat === user);
+    if (!member) return { ok: false, msg: "WeChat 不存在。" };
+    const p = D.PEOPLE[member.realName];
+    if (!p || !p.birthday) return { ok: false, msg: "账号资料缺失。" };
+    const expected = p.name + p.birthday.stemBranch;
+    if (pass !== expected) return { ok: false, msg: "密码不对。想想：真名 + 生辰年干支。" };
+    return { ok: true, member };
+  }
+  function renderForum() {
+    if (S.forumUser) { renderForumList(); return; }
+    const memberList = (D.FORUM.members || []).map((m) =>
+      '<li><code>' + m.wechat + '</code> · ' + m.name + '</li>').join("");
+    const html =
+      '<div class="forum-login">' +
+        '<h3>' + D.FORUM.title + '</h3>' +
+        '<p class="forum-sub muted">' + D.FORUM.subtitle + '</p>' +
+        '<p class="forum-hint muted">' + D.FORUM.loginHint + '</p>' +
+        '<div class="forum-login-form">' +
+          '<label>WeChat</label>' +
+          '<input id="forumUser" autocomplete="off" spellcheck="false" />' +
+          '<label>密码</label>' +
+          '<input id="forumPass" type="password" autocomplete="off" />' +
+          '<button id="forumGo" type="button">登 录</button>' +
+          '<p id="forumMsg"></p>' +
+        '</div>' +
+        '<details class="forum-member-list">' +
+          '<summary>已知账号（点开看）</summary>' +
+          '<ul>' + memberList + '</ul>' +
+        '</details>' +
+      '</div>';
+    showPage("论坛 · 登录", html, () => {
+      const userEl = $("#forumUser"), passEl = $("#forumPass"), msgEl = $("#forumMsg"), btn = $("#forumGo");
+      function tryLogin() {
+        const u = (userEl.value || "").trim();
+        const p = passEl.value || "";
+        const r = forumCheckLogin(u, p);
+        if (!r.ok) {
+          msgEl.className = "err"; msgEl.textContent = r.msg;
+          horror(1); return;
+        }
+        S.forumUser = r.member.wechat;
+        store.save({ forumUser: S.forumUser });
+        msgEl.className = "ok"; msgEl.textContent = "登录成功：以 " + r.member.name + " 身份进入。";
+        setTimeout(renderForumList, 600);
+      }
+      btn.onclick = tryLogin;
+      passEl.addEventListener("keydown", (e) => { if (e.key === "Enter") tryLogin(); });
     });
   }
-  function showTruthReveal() {
+  function renderForumList() {
+    const me = (D.FORUM.members || []).find((m) => m.wechat === S.forumUser);
+    const list = (D.FORUM.threads || []).map((t) =>
+      '<div class="forum-thread-item" data-id="' + t.id + '">' +
+        '<div class="forum-thread-title">' + t.title + '</div>' +
+        '<div class="forum-thread-meta">' +
+          '<span>' + t.author + '</span>' +
+          '<span>' + t.time + '</span>' +
+          '<span>· ' + t.replies + ' 帖</span>' +
+        '</div>' +
+      '</div>').join("");
     const html =
-      `<div class="truth-reveal">
-        <div class="truth-seal">印 · 已解</div>
-        <pre class="truth-text">${D.TRUTH.reveal}</pre>
-      </div>`;
-    showPage("真相 · 已解开", html);
-    horror(3);
-    const host = $("#pageBody");
-    if (host) { const b = document.createElement("div"); b.className = "blood truth-blood"; host.appendChild(b); }
+      '<div class="forum-wrap">' +
+        '<div class="forum-bar">' +
+          '<span class="forum-me muted">登录身份：' + (me ? me.name : S.forumUser) + '</span>' +
+          '<button id="forumLogout" type="button" class="forum-logout">登出</button>' +
+        '</div>' +
+        '<div class="forum-thread-list">' + list + '</div>' +
+        '<div id="forumThreadHost"></div>' +
+      '</div>';
+    showPage("论坛 · 同道杂谈", html, () => {
+      $("#forumLogout").onclick = () => { S.forumUser = null; store.save({ forumUser: null }); renderForum(); };
+      document.querySelectorAll(".forum-thread-item").forEach((el) =>
+        el.addEventListener("click", () => {
+          const t = D.FORUM.threads.find((x) => x.id === el.dataset.id);
+          const posts = (t.posts || []).map((p) =>
+            '<div class="forum-post">' +
+              '<div class="forum-post-head"><span class="forum-post-who">' + p.who + '</span><span class="forum-post-time">' + p.time + '</span></div>' +
+              '<div class="forum-post-text">' + p.text + '</div>' +
+            '</div>').join("");
+          $("#forumThreadHost").innerHTML =
+            '<div class="forum-thread-detail">' +
+              '<h4>' + t.title + '</h4>' +
+              '<div class="forum-thread-meta" style="margin-bottom:12px">' +
+                '<span>' + t.author + '</span>' +
+                '<span>' + t.time + '</span>' +
+                '<span>· ' + t.replies + ' 帖</span>' +
+              '</div>' +
+              posts +
+            '</div>';
+        }));
+    });
   }
 
   /* =====================================================================
@@ -671,8 +846,8 @@
     { id: "chats", ico: "💬", nm: "群聊", gate: "", href: "chats.html" },
     { id: "dms", ico: "✉", nm: "私信", gate: "", href: "dms.html" },
     { id: "moments", ico: "🌄", nm: "朋友圈", gate: "", href: "moments.html" },
+    { id: "forum", ico: "💭", nm: "论坛", gate: "", href: "forum.html" },
     { id: "news", ico: "📰", nm: "新闻", gate: "", href: "news.html" },
-    { id: "truth", ico: "🔑", nm: "真相", gate: "", href: "truth.html" },
     { id: "msg", ico: "✉", nm: "讯息", gate: "", href: "msgs.html" },
   ];
   function initHub() {
@@ -703,7 +878,7 @@
     const map = {
       search: renderSearch, vault: renderVault, bw: renderBW, qc: renderQC,
       notes: renderNotes, chats: renderChats, dms: renderDMs, moments: renderMoments,
-      news: renderNews, truth: renderTruth, msgs: renderMsg,
+      forum: renderForum, news: renderNews, truth: renderTruth, msgs: renderMsg,
     };
     if (map[page]) map[page]();
     sync();
