@@ -383,8 +383,8 @@
   let ninePlaced = {};     // { "0,0": "车", "0,1": "王", ... }
   function openNinePalace() {
     if (S.nineSolved) {
-      // 已解开：直接跳论坛沈某帖
-      location.href = "forum.html#thread-t3";
+      // 已解开：直接跳新闻沈某投稿
+      location.href = "news.html#shen";
       return;
     }
     if (document.getElementById("nine-modal")) return;
@@ -393,25 +393,22 @@
     for (let r = 0; r < 3; r++) {
       for (let c = 0; c < 3; c++) {
         const cell = N.grid[r][c];
-        const zhi = cell.zhi || "—";
         const gua = cell.gua || "中";
         cells.push(
           '<div class="palace-cell' + (cell.general ? "" : " center-cell") + '" data-r="' + r + '" data-c="' + c + '" data-expected="' + (cell.general || "") + '">' +
             '<div class="gua">' + gua + '</div>' +
-            '<div class="zhi">' + zhi + '</div>' +
             '<div class="slot" data-r="' + r + '" data-c="' + c + '"></div>' +
           '</div>'
         );
       }
     }
     const pool = N.pool.map((g) =>
-      '<div class="general-chip" draggable="true" data-id="' + g.id + '">' +
+      '<div class="general-chip" draggable="false" data-id="' + g.id + '">' +
         '<div class="gname">' + g.name + '</div>' +
-        '<div class="gdesc">' + g.desc + '</div>' +
       '</div>'
     ).join("");
     const incant = D.SUMMON_INCANTATION.rows.map((row) =>
-      '<div class="summon-row"><span class="sgua">' + row.gua + '</span><span class="szhi">' + row.zhi + '</span><span class="sgen">' + row.general + '</span></div>'
+      '<div class="summon-row">' + row.general + '</div>'
     ).join("");
     const modal = document.createElement("div");
     modal.id = "nine-modal";
@@ -449,9 +446,10 @@
       modal.querySelectorAll(".general-chip").forEach((c) => { c.classList.remove("selected", "placed"); });
       setNineMsg("已重置。");
     };
-    // chip 点击（移动端 tap-to-place）
+    // chip 点击 / 拖拽（pointer 统一：鼠标+触摸）
     modal.querySelectorAll(".general-chip").forEach((chip) => {
       chip.addEventListener("click", () => {
+        if (chip._drag && chip._drag.dragged) { chip._drag.dragged = false; return; }
         const id = chip.dataset.id;
         // 已放置的 chip：点击收回
         if (chip.classList.contains("placed")) {
@@ -475,26 +473,67 @@
         chip.classList.add("selected");
         setNineMsg("已选中 " + id + " 帅。点选目标宫位。");
       });
-      // dragstart
-      chip.addEventListener("dragstart", (e) => { e.dataTransfer.setData("text/plain", id); chip.classList.add("dragging"); });
-      chip.addEventListener("dragend", () => chip.classList.remove("dragging"));
+
+      chip.addEventListener("pointerdown", (e) => {
+        if (e.button !== 0) return;
+        const pid = e.pointerId;
+        try { chip.setPointerCapture(pid); } catch (_) {}
+        chip._drag = { pid, startX: e.clientX, startY: e.clientY, dragging: false, dragged: false, ghost: null };
+        const onMove = (ev) => {
+          if (ev.pointerId !== pid || !chip._drag) return;
+          const d = chip._drag;
+          if (!d.dragging) {
+            const dist = Math.hypot(ev.clientX - d.startX, ev.clientY - d.startY);
+            if (dist < 10) return;
+            d.dragging = true;
+            const rect = chip.getBoundingClientRect();
+            const ghost = document.createElement("div");
+            ghost.className = "nine-ghost";
+            ghost.textContent = chip.querySelector(".gname").textContent;
+            ghost.style.left = rect.left + "px";
+            ghost.style.top = rect.top + "px";
+            ghost.style.width = rect.width + "px";
+            ghost.style.height = rect.height + "px";
+            document.body.appendChild(ghost);
+            d.ghost = ghost;
+            chip.classList.add("dragging");
+          }
+          if (d.ghost) {
+            d.ghost.style.transform = "translate(" + (ev.clientX - d.startX) + "px, " + (ev.clientY - d.startY) + "px)";
+          }
+        };
+        const onUp = (ev) => {
+          if (ev.pointerId !== pid || !chip._drag) return;
+          const d = chip._drag;
+          try { chip.releasePointerCapture(pid); } catch (_) {}
+          chip.removeEventListener("pointermove", onMove);
+          chip.removeEventListener("pointerup", onUp);
+          chip.removeEventListener("pointercancel", onUp);
+          if (d.dragging) {
+            chip.classList.remove("dragging");
+            if (d.ghost) d.ghost.remove();
+            d.dragged = true;
+            // 找落点
+            const target = document.elementFromPoint(ev.clientX, ev.clientY);
+            const cell = target && target.closest(".palace-cell");
+            if (cell) {
+              const r = cell.dataset.r, c = cell.dataset.c;
+              placeNine(modal, r, c, chip.dataset.id);
+            }
+          }
+          // 保留 _drag 到 click 判定后由 click 清理
+        };
+        chip.addEventListener("pointermove", onMove);
+        chip.addEventListener("pointerup", onUp);
+        chip.addEventListener("pointercancel", onUp);
+      });
     });
-    // cell 点击（移动端放置）
+    // cell 点击（tap-to-place 兜底）
     modal.querySelectorAll(".palace-cell").forEach((cell) => {
       cell.addEventListener("click", () => {
         if (!nineSelected) return;
         const r = cell.dataset.r, c = cell.dataset.c;
         placeNine(modal, r, c, nineSelected);
-      });
-      // dragover / drop（桌面）
-      cell.addEventListener("dragover", (e) => { e.preventDefault(); cell.classList.add("drag-over"); });
-      cell.addEventListener("dragleave", () => cell.classList.remove("drag-over"));
-      cell.addEventListener("drop", (e) => {
-        e.preventDefault(); cell.classList.remove("drag-over");
-        const id = e.dataTransfer.getData("text/plain");
-        if (!id) return;
-        const r = cell.dataset.r, c = cell.dataset.c;
-        placeNine(modal, r, c, id);
       });
     });
   }
@@ -555,13 +594,13 @@
     if (S.audio) { ensureAudio(); sting(3); }
     S.nineSolved = true; S.shenUnlocked = true;
     store.save({ nineSolved: true, shenUnlocked: true });
-    setTimeout(() => {
-      modal.classList.add("success");
       setTimeout(() => {
-        modal.remove();
-        location.href = "forum.html#thread-t3";
-      }, 900);
-    }, 700);
+        modal.classList.add("success");
+        setTimeout(() => {
+          modal.remove();
+          location.href = "news.html#shen";
+        }, 900);
+      }, 700);
   }
 
   /* =====================================================================
@@ -741,7 +780,7 @@
           res.innerHTML = personHTML(personKey, personHit);
           if (S.bkShown && !S.shenUnlocked) {
             S.shenUnlocked = true; store.save({ shenUnlocked: true });
-            flash(null, "沈某投稿已解锁 · 新闻 / 论坛可见");
+            flash(null, "沈某投稿已解锁 · 新闻可见");
           }
           log("检索人物：" + personKey);
           const isFoe = !!(personHit.foe || (personHit.tag && personHit.tag.indexOf("反派") >= 0));
@@ -784,13 +823,15 @@
   function luoshuHTML() {
     const bodyRows = D.LUOSHU.body.map((r) =>
       `<tr><td style="color:var(--cinnabar-gold)">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("");
+    const palaceZhi = "坎宫子 · 艮宫丑寅 · 震宫卯 · 巽宫辰巳 · 离宫午 · 坤宫未申 · 兑宫酉 · 乾宫戌亥";
     return `<div class="result"><h4>洛书九宫 · 配数 + 人身造化</h4>
       <p>坎一 · 坤二 · 震三 · 巽四 · 中五 · 乾六 · 兑七 · 艮八 · 离九。</p>
       <table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:.82rem">
         <tr style="color:var(--txt-dim)"><td>人身造化</td><td>部位</td><td>卦象 → 数</td></tr>
         ${bodyRows}
       </table>
-      <p style="margin-top:8px;color:var(--txt-dim)">取祖气路数：${D.LUOSHU.route}</p>
+      <p style="margin-top:10px;color:var(--cinnabar-gold);font-size:.84rem">九宫地支：${palaceZhi}</p>
+      <p style="margin-top:6px;color:var(--txt-dim)">取祖气路数：${D.LUOSHU.route}</p>
     </div>`;
   }
   function bodyMapHTML() {
@@ -1142,6 +1183,13 @@
       </div>`;
     }).join("");
     showPage("新闻 · 残存剪报", `<div class="news-feed">${items}</div>`, () => {
+      if (location.hash === "#shen") {
+        setTimeout(() => {
+          const feed = document.querySelector(".news-feed");
+          const target = feed && feed.lastElementChild;
+          if (target && target.classList.contains("news-item")) target.scrollIntoView({ behavior: "smooth", block: "center" });
+        }, 80);
+      }
       const btn = document.getElementById("shenContinue");
       if (!btn) return;
       btn.onclick = () => {
@@ -1172,7 +1220,7 @@
     } else {
       const flds = D.TRUTH.fields.map((f, i) =>
         '<div class="truth-row">' +
-          '<label>' + f.key + (f.age != null ? " · 约" + f.age + "岁" : "") + '</label>' +
+          '<label>' + f.key + '</label>' +
           '<input class="truth-in" id="tk' + i + '" autocomplete="off" />' +
         '</div>').join("");
       card.innerHTML =

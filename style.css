@@ -676,8 +676,8 @@ body.fx-signal #app{animation:signalWobble .5s ease-in-out 2;
   background:var(--ink-xuan-3);
   border:1px solid var(--iron);border-radius:10px;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  padding:6px;text-align:center;
-  min-height:80px;
+  padding:8px 6px;text-align:center;
+  min-height:86px;
   transition:border-color .2s,background .2s;
 }
 .palace-cell.center-cell{
@@ -685,20 +685,16 @@ body.fx-signal #app{animation:signalWobble .5s ease-in-out 2;
   border-style:dashed;opacity:.7;
 }
 .palace-cell .gua{
-  font-size:1.1rem;color:var(--cinnabar-gold);font-weight:600;
+  font-size:1.15rem;color:var(--cinnabar-gold);font-weight:600;
   letter-spacing:.06em;
 }
-.palace-cell .zhi{
-  font-size:.78rem;color:var(--txt-dim);margin-top:2px;letter-spacing:.04em;
-}
 .palace-cell .slot{
-  margin-top:6px;min-height:24px;width:100%;
+  margin-top:8px;min-height:26px;width:100%;
   display:flex;align-items:center;justify-content:center;
   border-radius:6px;
 }
 .palace-cell .slot.filled{background:rgba(201,162,75,.18)}
 .palace-cell .slot.wrong{background:rgba(178,58,46,.35);animation:shake-x .3s ease}
-.palace-cell.drag-over{border-color:var(--cinnabar-gold);background:rgba(201,162,75,.12)}
 .placed-name{
   font-size:1.1rem;color:var(--can-bai);font-weight:600;
   letter-spacing:.04em;
@@ -711,8 +707,8 @@ body.fx-signal #app{animation:signalWobble .5s ease-in-out 2;
 }
 .general-chip{
   background:var(--ink-xuan-2);border:1px solid var(--iron);
-  border-radius:8px;padding:6px 10px;cursor:grab;
-  user-select:none;
+  border-radius:8px;padding:7px 12px;cursor:grab;
+  user-select:none;touch-action:none;
   transition:all .2s;
 }
 .general-chip:hover{border-color:var(--cinnabar-gold);background:rgba(201,162,75,.08)}
@@ -725,22 +721,25 @@ body.fx-signal #app{animation:signalWobble .5s ease-in-out 2;
   border-style:dashed;
 }
 .general-chip.dragging{opacity:.4}
-.general-chip .gname{color:var(--cinnabar-gold);font-size:.86rem;font-weight:600}
-.general-chip .gdesc{color:var(--txt-dim);font-size:.7rem;margin-top:1px}
+.general-chip .gname{color:var(--cinnabar-gold);font-size:.88rem;font-weight:600}
+.nine-ghost{
+  position:fixed;z-index:200;
+  background:var(--ink-xuan-2);border:1px solid var(--cinnabar-gold);
+  border-radius:8px;padding:7px 12px;
+  color:var(--cinnabar-gold);font-size:.88rem;font-weight:600;
+  pointer-events:none;opacity:.9;
+  box-shadow:0 6px 22px rgba(0,0,0,.5);
+}
 .summon-panel{
   background:var(--ink-xuan-3);border:1px solid var(--iron);
   border-radius:10px;padding:12px;
 }
 .summon-title{color:var(--cinnabar-gold);font-size:.84rem;letter-spacing:.14em;margin-bottom:8px}
 .summon-row{
-  display:grid;grid-template-columns:32px 50px 1fr;
-  font-size:.78rem;color:var(--txt-dim);
-  padding:3px 0;border-bottom:1px dashed rgba(201,162,75,.1);
+  font-size:.8rem;color:var(--txt);
+  padding:4px 0;border-bottom:1px dashed rgba(201,162,75,.1);
 }
 .summon-row:last-child{border-bottom:none}
-.summon-row .sgua{color:var(--cinnabar-gold)}
-.summon-row .szhi{color:var(--can-bai);font-family:ui-monospace,monospace}
-.summon-row .sgen{color:var(--txt)}
 .nine-foot{
   display:flex;justify-content:space-between;align-items:center;
   margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);
