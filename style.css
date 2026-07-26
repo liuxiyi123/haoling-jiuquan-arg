@@ -809,7 +809,46 @@ body.fx-signal #app{animation:signalWobble .5s ease-in-out 2;
   box-shadow:0 0 8px rgba(178,30,30,.5);
 }
 
-/* 红色"都得死"铺满 */
+/* 恐怖全屏层：黑底 + 中央照片 + 随机铺满“你们都要死” */
+.horror-backdrop{
+  position:fixed;inset:0;z-index:150;
+  background:#000;
+  pointer-events:none;
+  overflow:hidden;
+}
+.horror-portrait{
+  position:absolute;
+  top:50%;left:50%;
+  width:36vw;max-width:340px;min-width:170px;
+  aspect-ratio:1/1;
+  object-fit:cover;
+  border-radius:50%;
+  transform:translate(-50%,-50%) scale(.65);
+  filter:grayscale(.35) contrast(1.35) brightness(.82);
+  opacity:0;
+  box-shadow:0 0 70px rgba(178,30,30,.65),inset 0 0 50px rgba(0,0,0,.75);
+  animation:horror-portrait-in .75s ease forwards .15s;
+}
+@keyframes horror-portrait-in{
+  to{transform:translate(-50%,-50%) scale(1);opacity:1}
+}
+.horror-text{
+  position:absolute;
+  color:rgba(178,30,30,.95);
+  font-weight:900;
+  letter-spacing:.08em;
+  text-shadow:0 0 14px rgba(178,30,30,.95),0 0 4px #000;
+  opacity:0;
+  animation:horror-text-pop .32s ease forwards;
+  white-space:nowrap;
+  pointer-events:none;
+}
+@keyframes horror-text-pop{
+  from{opacity:0;transform:translate(-50%,-50%) scale(.35)}
+  to  {opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
+
+/* 红色"都得死"铺满（保留作 body 级兜底） */
 .fx-red-flood{position:relative}
 .fx-red-flood::before{
   content:"都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死";
@@ -829,11 +868,12 @@ body.fx-signal #app{animation:signalWobble .5s ease-in-out 2;
 }
 @media (max-width:720px){
   .fx-red-flood::before{font-size:1.5rem;gap:10px;padding:14px}
+  .horror-portrait{width:52vw;min-width:150px}
 }
 
 /* 系统崩坏 modal */
 .fx-system-corrupt{
-  position:fixed;inset:0;z-index:150;
+  position:fixed;inset:0;z-index:155;
   display:flex;align-items:center;justify-content:center;
   background:rgba(60,0,0,.6);backdrop-filter:blur(8px);
   pointer-events:none;

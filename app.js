@@ -612,31 +612,73 @@
     if (!D.HORROR_PEOPLE || D.HORROR_PEOPLE.indexOf(personKey) < 0) return;
     S.spooked = true;               // 锁住，避免重复触发
     store.save({ spooked: true });
-    runHorrorSequence();
+    runHorrorSequence(personKey);
   }
-  function runHorrorSequence() {
+  function runHorrorSequence(personKey) {
     const body = document.body;
-    // 1. 剧烈摇晃（1.2s）
+    const person = D.PEOPLE && D.PEOPLE[personKey];
+    const imgSrc = person && person.img ? person.img : "";
+
+    // 构建全屏恐怖层：黑底 + 中央照片 + 随机文字
+    const backdrop = document.createElement("div");
+    backdrop.id = "horror-backdrop";
+    backdrop.className = "horror-backdrop";
+
+    const portrait = document.createElement("img");
+    portrait.className = "horror-portrait";
+    portrait.src = imgSrc;
+    portrait.alt = personKey || "";
+    backdrop.appendChild(portrait);
+
+    // 随机铺满“你们都要死”
+    const TEXT = "你们都要死";
+    const count = window.innerWidth < 720 ? 60 : 110;
+    for (let i = 0; i < count; i++) {
+      const span = document.createElement("span");
+      span.className = "horror-text";
+      span.textContent = TEXT;
+      const size = 0.85 + Math.random() * 2.6;
+      const rot = -28 + Math.random() * 56;
+      const top = Math.random() * 100;
+      const left = Math.random() * 100;
+      const delay = 0.25 + Math.random() * 2.4;
+      span.style.cssText =
+        "top:" + top.toFixed(2) + "%;" +
+        "left:" + left.toFixed(2) + "%;" +
+        "font-size:" + size.toFixed(2) + "rem;" +
+        "transform:translate(-50%,-50%) rotate(" + rot.toFixed(1) + "deg);" +
+        "animation-delay:" + delay.toFixed(2) + "s;";
+      backdrop.appendChild(span);
+    }
+    document.body.appendChild(backdrop);
+
+    // 1. 剧烈摇晃 + 高音频
     body.classList.add("fx-shake-violent");
     if (S.audio) { ensureAudio(); playReal("stingHigh"); }
+
+    // 2. 中央照片浮现 + 流血 + 诡异笑
     setTimeout(() => {
-      // 2-3. 肖像流血 + 诡异笑
-      body.querySelectorAll(".portrait-img, .wx-photo").forEach((img) => {
-        img.classList.add("fx-bleed-eyes", "fx-uncanny-smile");
-      });
-      // 4. 红色"都得死"铺满
-      body.classList.add("fx-red-flood");
+      portrait.classList.add("fx-bleed-eyes", "fx-uncanny-smile");
       if (S.audio) { ensureAudio(); playReal("stingMid"); }
-    }, 400);
+    }, 220);
+
+    // 3. 文字铺满后，系统崩坏 modal 闪现
     setTimeout(() => {
-      // 5. 系统崩坏 modal
       showSystemCorruptModal();
-    }, 1800);
+      if (S.audio) { ensureAudio(); playReal("glass"); }
+    }, 4200);
+
+    // 4. 停止摇晃、移除崩坏 modal，文字与照片保持
     setTimeout(() => {
-      body.classList.remove("fx-shake-violent", "fx-red-flood");
-      // 6. 王鉴问题 modal
+      body.classList.remove("fx-shake-violent");
+      const sc = document.getElementById("sys-corrupt-modal");
+      if (sc) sc.remove();
+    }, 6000);
+
+    // 5. 王鉴问答出场（等文字铺满并停留后再出）
+    setTimeout(() => {
       showWangjianQuestionModal();
-    }, 3400);
+    }, 7400);
   }
   function showSystemCorruptModal() {
     if (document.getElementById("sys-corrupt-modal")) return;
@@ -653,6 +695,8 @@
   }
   function clearHorrorEffects() {
     document.body.classList.remove("fx-shake-violent", "fx-red-flood");
+    const bd = document.getElementById("horror-backdrop");
+    if (bd) bd.remove();
     document.querySelectorAll(".fx-bleed-eyes, .fx-uncanny-smile").forEach((el) => el.classList.remove("fx-bleed-eyes", "fx-uncanny-smile"));
     const sc = document.getElementById("sys-corrupt-modal"); if (sc) sc.remove();
   }
