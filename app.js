@@ -565,8 +565,11 @@
     const wjMsgs = D.WANGJIAN.filter((m) => S.wj.indexOf(m.id) >= 0).sort((a, b) => a.id - b.id);
     const lastWJ = wjMsgs.length ? wjMsgs[wjMsgs.length - 1] : null;
     const wjPreview = lastWJ ? (lastWJ.text.length > 32 ? lastWJ.text.slice(0, 32) + "…" : lastWJ.text) : "（暂无消息）";
+    const wjAva = D.PEOPLE["王鉴"].img
+      ? `<img class="wx-ava" src="${D.PEOPLE["王鉴"].img}" alt="修车师傅" loading="lazy">`
+      : `<div class="wx-ava wx-ava-fallback">🔧</div>`;
     const wjItem = `<div class="wx-chat-item" data-key="wj">
-      <img class="wx-ava" src="${D.PEOPLE["王鉴"].img}" alt="修车师傅" loading="lazy">
+      ${wjAva}
       <div class="wx-chat-info">
         <div class="wx-chat-name">修车师傅</div>
         <div class="wx-chat-preview">${wjPreview.replace(/\n/g, " ")}</div>
@@ -593,9 +596,12 @@
   function openWXChat(key) {
     if (key === "wj") {
       const msgs = D.WANGJIAN.filter((m) => S.wj.indexOf(m.id) >= 0).sort((a, b) => a.id - b.id);
+      const wjAva = D.PEOPLE["王鉴"].img
+        ? `<img class="wx-ava-sm" src="${D.PEOPLE["王鉴"].img}" alt="修车师傅" loading="lazy">`
+        : `<div class="wx-ava-sm wx-ava-fallback">🔧</div>`;
       const bubbles = msgs.map((m) =>
         `<div class="wx-bubble">
-          <img class="wx-ava-sm" src="${D.PEOPLE["王鉴"].img}" alt="修车师傅" loading="lazy">
+          ${wjAva}
           <div class="wx-bubble-text">${m.text.replace(/\n/g, "<br/>")}</div>
         </div>`).join("");
       const html = `<div class="wx-chat-detail">
@@ -649,11 +655,16 @@
   function openWXGroup(id) {
     const g = D.GROUP_CHATS.find((x) => x.id === id);
     if (!g) return;
-    const lines = g.msgs.map((m) =>
-      `<div class="wx-bubble ${m.from === "我" ? "me" : ""}">
-        <img class="wx-ava-sm" src="${(m.from === "我" ? D.PEOPLE["刘希夷"].img : (D.PEOPLE[A_TO_NAME[m.from]] || {img:""}).img) || ""}" alt="${m.from}" onerror="this.style.visibility='hidden'">
+    // 群聊网名 → 真实人物映射（v8：去掉 A-E 代名）
+    const FROM_PEOPLE = { "巴代路遥": "麻三", "灵宝千寻": "孙师", "西河老贾": "贾生", "奇门迟": "迟浩亮", "桐凤斋": "沈佳诚", "我": "刘希夷", "群主": "黑律叛师" };
+    const lines = g.msgs.map((m) => {
+      const personKey = FROM_PEOPLE[m.from] || null;
+      const ava = personKey ? ((D.PEOPLE[personKey] || {}).img || "") : "";
+      return `<div class="wx-bubble ${m.from === "我" ? "me" : ""}">
+        <img class="wx-ava-sm" src="${ava}" alt="${m.from}" loading="lazy" onerror="this.style.visibility='hidden'">
         <div class="wx-bubble-text"><span class="wx-bubble-who">${m.from}</span>${m.text}</div>
-      </div>`).join("");
+      </div>`;
+    }).join("");
     const html = `<div class="wx-chat-detail">
       <div class="wx-chat-header"><button class="wx-back" type="button">‹</button><span class="wx-chat-name">${g.name}</span></div>
       <div class="wx-group-intro muted">${g.intro}</div>
@@ -663,8 +674,8 @@
       $(".wx-back").onclick = () => { S.wxTab = "groups"; renderWX(); };
     });
   }
-  // 群聊匿名 A–E → 真实人物映射（用于显示头像）
-  const A_TO_NAME = { A: "麻三", B: "孙师", C: "贾生", D: "迟浩亮", E: "沈佳诚", 群主: "黑律叛师", "道友·甲": "", "道友·乙": "", "道友·丙": "" };
+  // 群聊网名 → 真实人物映射（v8：去掉 A-E 代名，参见 FROM_PEOPLE）
+  // const A_TO_NAME = { A: "麻三", B: "孙师", C: "贾生", D: "迟浩亮", E: "沈佳诚", 群主: "黑律叛师", "道友·甲": "", "道友·乙": "", "道友·丙": "" };
 
   /* =====================================================================
    *  新闻流（含沈某投稿 → 已阅·继续 触发真相浮窗）

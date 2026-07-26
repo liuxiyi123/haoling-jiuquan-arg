@@ -546,3 +546,18 @@ body.fx-flicker #app{animation:flick .5s steps(3) 2}
   .wx-tabbar{margin:-18px -14px 14px}
   .wx-bubble-text{max-width:80%}
 }
+
+/* =====================================================================
+ *  v8 · 真拍头像 fallback（王鉴无实拍头像，锁眼 emoji 占位）
+ * ===================================================================== */
+.wx-ava-fallback{
+  background:var(--ink-xuan-3);
+  color:var(--can-bai);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:1.2rem;border-radius:50%;
+  border:1px solid var(--iron);
+  flex:0 0 auto;
+  text-shadow:0 0 6px rgba(178,58,46,.35);
+}
+.wx-ava-fallback.wx-ava{width:44px;height:44px}
+.wx-ava-fallback.wx-ava-sm{width:34px;height:34px;font-size:.95rem}
