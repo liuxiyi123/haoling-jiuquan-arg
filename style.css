@@ -197,22 +197,34 @@ body.fx-flicker #app{animation:flick .5s steps(3) 2}
 .portrait{position:relative;width:172px;height:212px;margin:14px auto;border:2px solid var(--iron);border-radius:8px;background:linear-gradient(180deg,var(--ink-xuan-3),var(--ink-xuan));overflow:hidden;box-shadow:0 10px 26px rgba(0,0,0,.5)}
 .portrait.death{border-color:var(--anti-paper);box-shadow:0 0 0 5px var(--anti-paper),0 10px 26px rgba(0,0,0,.6)}
 .portrait svg{width:100%;height:100%;display:block}
-.portrait .blood{position:absolute;inset:0;pointer-events:none;opacity:0;background:radial-gradient(circle at 50% 26%,rgba(178,58,46,0),transparent 60%)}
-.portrait.bleeding .blood{animation:bleed 5s ease-out forwards}
-@keyframes bleed{
-  0%{opacity:0;background:radial-gradient(circle at 50% 24%,rgba(178,58,46,.85),transparent 55%)}
-  35%{opacity:1}
-  100%{opacity:1;background:radial-gradient(circle at 50% 18%,rgba(120,16,12,.95),transparent 70%),linear-gradient(180deg,transparent 38%,rgba(120,16,12,.9) 100%)}
+.portrait .blood{position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:
+    radial-gradient(ellipse 78% 64% at 50% 30%, rgba(92,6,6,0), transparent 62%),
+    radial-gradient(circle at 50% 24%, rgba(176,18,14,.92), rgba(120,8,8,0) 54%),
+    radial-gradient(circle at 64% 40%, rgba(140,10,9,.7), transparent 40%),
+    linear-gradient(180deg, transparent 26%, rgba(96,4,4,.95) 100%);
 }
+.portrait .blood::before{content:"";position:absolute;inset:0;opacity:.55;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='240'%3E%3Cfilter id='b'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' seed='7'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.45 0 0 0 0 0.02 0 0 0 0 0.02 0 0 0 0.9 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3C/svg%3E");
+  background-size:180px 200px}
+.portrait .blood::after{content:"";position:absolute;top:16%;left:48%;width:3px;height:0;pointer-events:none;
+  background:linear-gradient(180deg, rgba(150,10,8,.95), rgba(120,8,8,.2) 70%, transparent);
+  border-radius:0 0 3px 3px;
+  box-shadow:20px 10px 0 -1px rgba(130,8,8,.75), -16px 18px 0 -1px rgba(140,10,9,.6);
+  animation:drip 5s ease-out forwards}
+.portrait.bleeding .blood{animation:bleed 5s ease-out forwards}
+@keyframes bleed{0%{opacity:0;background:radial-gradient(circle at 50% 22%, rgba(176,18,14,.9), transparent 52%)}30%{opacity:1}100%{opacity:1}}
+@keyframes drip{0%{height:0}45%{height:52%}100%{height:74%}}
 .portrait.bleeding::after{content:"";position:absolute;left:0;right:0;bottom:0;height:0;pointer-events:none;
-  background:linear-gradient(180deg,transparent,rgba(120,16,12,.85));animation:seep 5s ease-out forwards;opacity:0}
-@keyframes seep{0%{opacity:0;height:0}40%{opacity:.6}100%{opacity:.9;height:46%}}
+  background:linear-gradient(180deg,transparent,rgba(96,4,4,.88));animation:seep 5s ease-out forwards;opacity:0}
+@keyframes seep{0%{opacity:0;height:0}40%{opacity:.6}100%{opacity:.92;height:48%}}
 .person .pname{color:var(--cinnabar-gold);font-size:1rem;margin-top:10px;letter-spacing:.04em}
 
-/* 降级：reduced-motion 下不播放渗血动画，直接呈静态血迹（不引入新裸 Hex） */
+/* 降级：reduced-motion 下不播放渗血动画，直接呈静态血迹 */
 @media (prefers-reduced-motion:reduce){
-  .portrait.bleeding .blood{opacity:1;background:radial-gradient(circle at 50% 18%,rgba(120,16,12,.9),transparent 70%),linear-gradient(180deg,transparent 38%,rgba(120,16,12,.82) 100%)}
-  .portrait.bleeding::after{opacity:.9;height:46%}
+  .portrait.bleeding .blood{opacity:1;background:radial-gradient(circle at 50% 24%,rgba(176,18,14,.92),transparent 54%),radial-gradient(circle at 64% 40%,rgba(140,10,9,.7),transparent 40%),linear-gradient(180deg,transparent 26%,rgba(96,4,4,.95) 100%)}
+  .portrait.bleeding::after{opacity:.92;height:48%}
+  .portrait .blood::after{height:74%}
 }
 
 /* 残卷：笔记 / 群聊 */
@@ -314,6 +326,11 @@ body.fx-flicker #app{animation:flick .5s steps(3) 2}
 #shatter{position:fixed;inset:0;z-index:260;pointer-events:none;width:100%;height:100%;opacity:0}
 #shatter.go{animation:shatterGo 1.5s ease forwards}
 @keyframes shatterGo{0%{opacity:0;transform:scale(1.06)}8%{opacity:1}100%{opacity:0;transform:scale(1)}}
+/* 碎裂瞬间白霜闪 */
+#shatterFlash{position:fixed;inset:0;z-index:259;pointer-events:none;opacity:0;
+  background:radial-gradient(circle at 47% 45%, rgba(255,255,255,.55), rgba(255,255,255,0) 40%)}
+#shatterFlash.go{animation:flashGo .5s ease-out forwards}
+@keyframes flashGo{0%{opacity:0}12%{opacity:.85}100%{opacity:0}}
 
 /* 新闻流 */
 .news-feed{display:grid;gap:14px;max-width:600px;margin:0 auto}

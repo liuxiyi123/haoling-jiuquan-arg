@@ -36,10 +36,47 @@
     location.reload();
   }
 
-  /* ---------- 恐怖特效 + 合成音频 ---------- */
+  /* ---------- 恐怖特效 + 音频（真实音效优先，缺失回退合成） ---------- */
   let AC = null, drone = null, droneGain = null;
-  function ensureAudio() { if (!AC) { const C = window.AudioContext || window.webkitAudioContext; if (C) AC = new C(); } if (AC && AC.state === "suspended") AC.resume(); }
+  // 真实音效清单：将对应 mp3 放入 assets/audio/ 即自动启用，缺失则回退 Web Audio 合成
+  const SOUNDS = {
+    ambient:   "assets/audio/ambient.mp3",   // 低频环境 drone（循环）
+    stingHigh: "assets/audio/sting-high.mp3", // 终局 / 强冲击
+    stingMid:  "assets/audio/sting-mid.mp3",  // 中冲击
+    stingLow:  "assets/audio/sting-low.mp3",  // 轻触发
+    glass:     "assets/audio/glass.mp3",      // 碎屏裂响
+    whisper:   "assets/audio/whisper.mp3"    // 可选低语
+  };
+  const AUDIO_FILES = { _init: false };
+  function initAudioFiles() {
+    if (AUDIO_FILES._init) return; AUDIO_FILES._init = true;
+    Object.keys(SOUNDS).forEach((k) => {
+      const a = new Audio();
+      a.preload = "auto"; a.loop = (k === "ambient");
+      a.volume = (k === "ambient") ? 0.5 : 0.9;
+      a.addEventListener("canplaythrough", () => { AUDIO_FILES[k] = a; }, { once: true });
+      a.addEventListener("error", () => { AUDIO_FILES[k] = null; }, { once: true });
+      a.src = SOUNDS[k]; AUDIO_FILES[k] = null;
+    });
+  }
+  function playReal(k, opts) {
+    opts = opts || {};
+    const a = AUDIO_FILES[k];
+    if (!a) return false;
+    try {
+      if (opts.volume != null) a.volume = opts.volume;
+      a.loop = !!opts.loop; a.currentTime = 0;
+      const p = a.play(); if (p && p.catch) p.catch(function () {});
+      return true;
+    } catch (e) { return false; }
+  }
+  function ensureAudio() {
+    if (!AC) { const C = window.AudioContext || window.webkitAudioContext; if (C) AC = new C(); }
+    if (AC && AC.state === "suspended") AC.resume();
+    initAudioFiles();
+  }
   function startDrone() {
+    if (playReal("ambient", { loop: true, volume: 0.5 })) { drone = { real: true }; return; }
     if (!AC || drone) return;
     const g = AC.createGain(); g.gain.value = 0; g.connect(AC.destination);
     const o1 = AC.createOscillator(); o1.type = "sine"; o1.frequency.value = 55;
@@ -54,12 +91,19 @@
     drone = { o1, o2, o3, lfo }; droneGain = g;
   }
   function stopDrone() {
+    if (drone && drone.real) {
+      const a = AUDIO_FILES.ambient;
+      if (a) { try { a.pause(); a.currentTime = 0; } catch (e) {} }
+      drone = null; return;
+    }
     if (!drone) return;
     droneGain.gain.linearRampToValueAtTime(0, AC.currentTime + 1.0);
-    const d = drone; setTimeout(() => { Object.values(d).forEach((n) => { try { n.stop(); } catch (e) {} }); }, 1100);
+    const d = drone; setTimeout(function () { Object.values(d).forEach(function (n) { try { n.stop(); } catch (e) {} }); }, 1100);
     drone = null; droneGain = null;
   }
   function sting(level) {
+    const slot = level >= 3 ? "stingHigh" : level === 2 ? "stingMid" : "stingLow";
+    if (playReal(slot)) return;
     if (!AC) return;
     const t = AC.currentTime;
     const base = 170 + level * 38;
@@ -69,7 +113,7 @@
     g.gain.exponentialRampToValueAtTime(0.17, t + 0.02);
     g.gain.exponentialRampToValueAtTime(0.0001, t + 0.95);
     g.connect(AC.destination);
-    freqs.forEach((f) => { const o = AC.createOscillator(); o.type = "sawtooth"; o.frequency.value = f; o.connect(g); o.start(t); o.stop(t + 0.95); });
+    freqs.forEach(function (f) { const o = AC.createOscillator(); o.type = "sawtooth"; o.frequency.value = f; o.connect(g); o.start(t); o.stop(t + 0.95); });
     const n = AC.createOscillator(); n.type = "sine";
     n.frequency.setValueAtTime(95, t); n.frequency.exponentialRampToValueAtTime(38, t + 0.8);
     n.connect(g); n.start(t); n.stop(t + 0.9);
@@ -78,7 +122,7 @@
     if (!S.fx) return;
     const cls = reduceMotion ? ["fx-vignette"] : ["fx-vignette", "fx-glitch", "fx-flicker"];
     document.body.classList.add(...cls);
-    if (level >= 3) screenShatter();
+    if (level >= 3) { screenShatter(); if (S.audio) playReal("glass"); }
     if (S.audio) sting(level);
     setTimeout(() => document.body.classList.remove(...cls), 900 + level * 350);
   }
@@ -168,22 +212,36 @@
   }
   function screenShatter() {
     if (reduceMotion || !S.fx) return;
+    const cx = 47, cy = 45;
     let svg = document.getElementById("shatter");
     if (!svg) {
       svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
       svg.id = "shatter";
       svg.setAttribute("viewBox", "0 0 100 100");
       svg.setAttribute("preserveAspectRatio", "none");
-      const lines = [
-        "M50 50 L8 4 M50 50 L92 10 M50 50 L96 52 M50 50 L70 96 M50 50 L18 94",
-        "M50 50 L30 18 M50 50 L74 30 M50 50 L38 78 M50 50 L62 70 M50 50 L14 46 M50 50 L88 70",
-      ];
-      svg.innerHTML = lines.map((d) => '<path d="' + d + '" stroke="rgba(230,235,240,.85)" stroke-width=".5" fill="none" stroke-linecap="round"/>').join("") +
-        '<circle cx="50" cy="50" r="2.4" fill="rgba(255,255,255,.9)"/>';
+      const rings = [4.5, 11, 19].map((r, i) =>
+        '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="rgba(232,238,244,.5)" stroke-width="' + (0.5 - i * 0.08) + '"/>').join("");
+      let shards = "";
+      const N = 22;
+      for (let i = 0; i < N; i++) {
+        const a = (i / N) * Math.PI * 2 + (i % 2 ? 0.12 : -0.08);
+        const len = 30 + ((i * 13) % 60);
+        const x2 = cx + Math.cos(a) * len, y2 = cy + Math.sin(a) * len;
+        const sx = cx + Math.cos(a) * 4, sy = cy + Math.sin(a) * 4;
+        shards += '<path d="M' + sx.toFixed(1) + ' ' + sy.toFixed(1) + ' L' + x2.toFixed(1) + ' ' + y2.toFixed(1) + '" stroke="rgba(230,236,242,.82)" stroke-width="' + (0.6 - (i % 3) * 0.12).toFixed(2) + '" fill="none" stroke-linecap="round"/>';
+        const a2 = a + 0.18, l2 = len * 0.55;
+        shards += '<path d="M' + x2.toFixed(1) + ' ' + y2.toFixed(1) + ' L' + (x2 + Math.cos(a2) * l2).toFixed(1) + ' ' + (y2 + Math.sin(a2) * l2).toFixed(1) + '" stroke="rgba(220,228,238,.5)" stroke-width=".3" fill="none"/>';
+      }
+      const frags = [[6, 8], [92, 12], [14, 86], [88, 82], [50, 4], [96, 50], [3, 52]]
+        .map((p) => '<polygon points="' + p[0] + ',' + p[1] + ' ' + (p[0] + 5) + ',' + (p[1] + 3) + ' ' + (p[0] + 2) + ',' + (p[1] + 7) + ' ' + (p[0] - 3) + ',' + (p[1] + 4) + '" fill="rgba(235,240,246,.35)"/>').join("");
+      svg.innerHTML = rings + shards + frags + '<circle cx="' + cx + '" cy="' + cy + '" r="2.2" fill="rgba(255,255,255,.92)"/>';
       document.body.appendChild(svg);
     }
     svg.classList.remove("go"); void svg.offsetWidth; svg.classList.add("go");
-    setTimeout(() => svg.classList.remove("go"), 1500);
+    let flash = document.getElementById("shatterFlash");
+    if (!flash) { flash = document.createElement("div"); flash.id = "shatterFlash"; document.body.appendChild(flash); }
+    flash.classList.remove("go"); void flash.offsetWidth; flash.classList.add("go");
+    setTimeout(() => { svg.classList.remove("go"); flash.classList.remove("go"); }, 1500);
   }
   function buildBreaking(perform) {
     if (S.bkShown || S.truth) return;
