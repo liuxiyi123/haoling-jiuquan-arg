@@ -121,9 +121,16 @@
   function horror(level) {
     if (!S.fx) return;
     const cls = reduceMotion ? ["fx-vignette"] : ["fx-vignette", "fx-glitch", "fx-flicker"];
+    if (level >= 2 && !reduceMotion) cls.push("fx-signal");
     document.body.classList.add(...cls);
     if (level >= 3) { screenShatter(); if (S.audio) playReal("glass"); }
     if (S.audio) sting(level);
+    if (level >= 2 && !reduceMotion) {
+      let sig = document.getElementById("fxSignal");
+      if (!sig) { sig = document.createElement("div"); sig.id = "fxSignal"; document.body.appendChild(sig); }
+      sig.classList.remove("go"); void sig.offsetWidth; sig.classList.add("go");
+      setTimeout(() => sig.classList.remove("go"), 600);
+    }
     setTimeout(() => document.body.classList.remove(...cls), 900 + level * 350);
   }
   function setAudio(on) {

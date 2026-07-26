@@ -331,6 +331,15 @@ body.fx-flicker #app{animation:flick .5s steps(3) 2}
   background:radial-gradient(circle at 47% 45%, rgba(255,255,255,.55), rgba(255,255,255,0) 40%)}
 #shatterFlash.go{animation:flashGo .5s ease-out forwards}
 @keyframes flashGo{0%{opacity:0}12%{opacity:.85}100%{opacity:0}}
+/* 信号干扰：扫描线 + 色散(RGB分离) + VHS 抖动 —— 伪网站突然扭曲揭露 */
+#fxSignal{position:fixed;inset:0;z-index:255;pointer-events:none;opacity:0;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px);
+  mix-blend-mode:multiply}
+#fxSignal.go{animation:signalFlash .55s steps(2) 1}
+@keyframes signalFlash{0%{opacity:0}18%{opacity:.92;filter:hue-rotate(10deg)}55%{opacity:.45}100%{opacity:0}}
+body.fx-signal #app{animation:signalWobble .5s ease-in-out 2;
+  filter:drop-shadow(2px 0 0 rgba(255,0,40,.55)) drop-shadow(-2px 0 0 rgba(0,200,255,.55))}
+@keyframes signalWobble{0%{transform:translateX(0) skewX(0)}28%{transform:translateX(-3px) skewX(-1.1deg)}60%{transform:translateX(3px) skewX(1deg)}100%{transform:translateX(0)}}
 
 /* 新闻流 */
 .news-feed{display:grid;gap:14px;max-width:600px;margin:0 auto}
