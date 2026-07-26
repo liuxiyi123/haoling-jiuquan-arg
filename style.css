@@ -21,6 +21,7 @@
   --line:rgba(201,162,75,.20);
   --fs-scale:1;
   --qr-white:#ffffff;         /* 功能性白（QR 底），显式令牌，不破铁律 */
+  --wechat-green:#07C160;     /* 微信绿，显式令牌，不破铁律 */
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
@@ -445,3 +446,103 @@ body.fx-flicker #app{animation:flick .5s steps(3) 2}
 .forum-post-who{color:var(--cinnabar-gold);font-size:.78rem}
 .forum-post-time{color:var(--txt-dim);font-size:.7rem}
 .forum-post-text{font-size:.88rem;color:var(--txt);line-height:1.85}
+
+/* =====================================================================
+ *  v7 · 微信（私聊 / 群聊 / 朋友圈 合一）+ 论坛已知卡 + 重置
+ *  目标：去掉"假 UI"感，贴近真实手机聊天软件的视觉重量。
+ * ===================================================================== */
+
+/* hub 里微信图标走微信绿，不与其它应用撞色 */
+.app[data-id="wx"] .ico{
+  background:linear-gradient(160deg,#0b9d4e,var(--wechat-green));
+  color:var(--qr-white);
+  box-shadow:0 4px 12px rgba(7,193,96,.35),inset 0 1px 0 rgba(255,255,255,.12);
+  border-color:rgba(7,193,96,.5);
+}
+
+/* 状态栏「重置」按钮：危险弱提示（铁律：零裸 Hex） */
+#btnReset{color:var(--cinnabar);border-color:rgba(178,58,46,.42)}
+#btnReset:hover{border-color:var(--cinnabar);color:var(--cinnabar)}
+
+/* 微信 tab 栏（吸顶 · 三 tab） */
+.wx-tabbar{
+  position:sticky;top:0;z-index:5;display:flex;
+  background:linear-gradient(180deg,rgba(36,35,42,.97),rgba(28,27,34,.93));
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+  border-radius:12px 12px 0 0;padding:6px;
+  margin:-18px -16px 14px;
+}
+.wx-tab{
+  flex:1;text-align:center;text-decoration:none;color:var(--txt-dim);
+  font-size:.86rem;letter-spacing:.06em;padding:9px 0;border-radius:9px;transition:.16s;
+}
+.wx-tab.on{color:var(--qr-white);background:rgba(7,193,96,.16);box-shadow:inset 0 -2px 0 var(--wechat-green)}
+.wx-tab:hover{color:var(--txt)}
+
+/* 会话 / 群聊 列表 */
+.wx-chat-list{
+  display:grid;gap:2px;max-width:620px;margin:0 auto;
+  background:var(--ink-xuan-2);border:1px solid var(--line);
+  border-radius:0 0 12px 12px;overflow:hidden;
+}
+.wx-chat-item{
+  display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;
+  border-bottom:1px solid rgba(201,162,75,.08);transition:.15s;
+}
+.wx-chat-item:last-child{border-bottom:none}
+.wx-chat-item:hover{background:var(--ink-xuan-3)}
+.wx-chat-item.locked{opacity:.5;cursor:default;filter:grayscale(.5)}
+.wx-ava{width:46px;height:46px;border-radius:9px;object-fit:cover;border:1px solid var(--line);flex-shrink:0}
+.wx-ava-ghost{display:grid;place-items:center;background:linear-gradient(160deg,#2f6f4a,#1d4a32);color:var(--qr-white);font-size:1.1rem;border-radius:9px}
+.wx-chat-info{flex:1;min-width:0}
+.wx-chat-name{color:var(--txt);font-size:.92rem;letter-spacing:.02em}
+.wx-chat-preview{color:var(--txt-dim);font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
+.wx-chat-preview.muted{font-style:italic}
+.wx-chat-meta{color:var(--txt-dim);font-size:.68rem;flex-shrink:0;align-self:flex-start;margin-top:2px}
+
+/* 聊天详情（气泡） */
+.wx-chat-detail{max-width:640px;margin:0 auto}
+.wx-chat-header{display:flex;align-items:center;gap:10px;padding:6px 4px 14px;border-bottom:1px solid var(--line);margin-bottom:12px}
+.wx-back{background:none;border:none;color:var(--cinnabar-gold);font-size:1.5rem;line-height:1;cursor:pointer;width:34px;height:34px;border-radius:50%;display:grid;place-items:center}
+.wx-back:hover{background:rgba(255,255,255,.06)}
+.wx-chat-header .wx-chat-name{font-size:1rem}
+.wx-group-intro{font-size:.78rem;margin-bottom:14px;padding:0 4px}
+.wx-bubbles{display:grid;gap:14px;padding-bottom:20px}
+.wx-bubble{display:flex;gap:10px;align-items:flex-start}
+.wx-bubble.me{flex-direction:row-reverse}
+.wx-ava-sm{width:38px;height:38px;border-radius:8px;object-fit:cover;border:1px solid var(--line);flex-shrink:0}
+.wx-bubble-text{
+  position:relative;max-width:74%;
+  background:var(--ink-xuan-3);border:1px solid var(--line);
+  border-radius:4px 12px 12px 12px;padding:10px 13px;
+  font-size:.9rem;line-height:1.8;color:var(--txt);
+}
+.wx-bubble.me .wx-bubble-text{
+  background:linear-gradient(160deg,#0e7c43,#0a6b3a);
+  border-color:rgba(7,193,96,.4);color:var(--qr-white);
+  border-radius:12px 4px 12px 12px;
+}
+.wx-bubble-who{display:block;color:var(--txt-dim);font-size:.7rem;margin-bottom:3px}
+.wx-bubble.me .wx-bubble-who{text-align:right;color:rgba(255,255,255,.72)}
+.wx-photo{margin-top:10px;width:100%;max-width:300px;border-radius:10px;border:1px solid var(--line);display:block}
+
+/* 论坛：已知账号卡（开放浏览，无登录） */
+.forum-known{
+  max-width:620px;margin:0 auto 18px;
+  background:linear-gradient(180deg,var(--ink-xuan-2),var(--ink-xuan));
+  border:1px solid var(--cinnabar-gold);border-radius:14px;padding:16px 18px;
+  box-shadow:0 0 26px rgba(201,162,75,.12);
+}
+.forum-known-title{color:var(--cinnabar-gold);font-size:.82rem;letter-spacing:.18em;margin-bottom:12px}
+.forum-known-row{display:flex;align-items:baseline;gap:10px;padding:6px 0;border-bottom:1px dashed rgba(201,162,75,.14);font-size:.9rem}
+.forum-known-row:last-of-type{border-bottom:none}
+.forum-known-row .lbl{color:var(--txt-dim);font-size:.74rem;min-width:52px;letter-spacing:.04em}
+.forum-known-row code{color:var(--cinnabar-gold);font-family:ui-monospace,monospace;font-size:.9rem;word-break:break-all}
+.forum-known-note{font-size:.76rem;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+
+/* 移动端：wx 列表与气泡更贴边 */
+@media (max-width:720px){
+  .wx-tabbar{margin:-18px -14px 14px}
+  .wx-bubble-text{max-width:80%}
+}

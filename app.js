@@ -1,11 +1,11 @@
 /* =========================================================================
- *  《号令九泉》ARG 原型 · 逻辑层（真·多页面 / 无后端 / 离线）
+ *  《号令九泉》ARG 原型 · 逻辑层（第七版 · 微信合一 · 清除数据 · 论坛开放）
  *  导航：index.html(hub 手机壳) + 各功能区独立 .html，点击真实跳转。
- *  解密链：检索真实笔记 → 九宫门(9381) → 黑纸辨识 → 人身造化门
- *          → 渐进解锁 刘希夷的每日笔记 → 群聊/私信/朋友圈 自行拼合。
- *  王鉴：boot(0)+qa(1) 开局连发；qb/qc 随解密触发（带输入延迟）；finale 仅终局后发。
- *  恐怖：CSS 故障/暗角/墨渗 + Web Audio 低频氛围与惊悚 sting（可开关）。
- *  人像/朋友圈/共享图：由 assets/img/ 真实生成，检索与私信/朋友圈引用。
+ *  微信（wx.html）= 私聊（修车师傅 + A–E）+ 群聊 + 朋友圈，三 tab 切换。
+ *  解密链：检索 → 九宫门(9381) → 黑纸辨识 → 人身造化门
+ *          → 渐进解锁笔记 → 群聊/私聊/朋友圈 拼合 → 论坛 → 真相锁。
+ *  清除数据：状态栏「重置」按钮 → 确认 → localStorage 清空 + 重载。
+ *  王鉴：boot(0)+qa(1) 开局连发；qb/qc 随解密触发；finale 终局后发。
  * ========================================================================= */
 (function () {
   "use strict";
@@ -19,14 +19,22 @@
   const store = {
     load() { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch (e) { return {}; } },
     save(o) { const cur = this.load(); localStorage.setItem(KEY, JSON.stringify(Object.assign(cur, o))); },
+    clear() { try { localStorage.removeItem(KEY); } catch (e) {} },
   };
   let S = Object.assign(
-    { qa: false, qb: false, qc: false, read: [], wj: [], wjUnread: 0, audio: false, fx: true, bled: [], death: false, truth: false, bkShown: false, shenRead: false, wjProtectDismissed: [], forumUser: null },
+    { qa: false, qb: false, qc: false, read: [], wj: [], wjUnread: 0, audio: false, fx: true, bled: [], death: false, truth: false, bkShown: false, shenRead: false, wjProtectDismissed: [], wxTab: "chats" },
     store.load()
   );
 
   const logEl = $("#logList");
   function log(msg) { if (!logEl) return; const li = document.createElement("li"); li.textContent = msg; logEl.insertBefore(li, logEl.firstChild); if (logEl.children.length > 14) logEl.removeChild(logEl.lastChild); }
+
+  /* ---------- 清除数据 / 重置 ---------- */
+  function clearData() {
+    if (!confirm("确定要清除所有数据并从头开始吗？此操作不可撤销。")) return;
+    store.clear();
+    location.reload();
+  }
 
   /* ---------- 恐怖特效 + 合成音频 ---------- */
   let AC = null, drone = null, droneGain = null;
@@ -101,7 +109,8 @@
       if (gate === "qa") ok = S.qa; else if (gate === "qb") ok = S.qb; else if (gate === "qc") ok = S.qc;
       a.classList.toggle("locked", !ok);
       const bd = a.querySelector(".badge"); if (bd) bd.remove();
-      if (a.dataset.id === "msg" && S.wjUnread > 0) {
+      // 微信应用上挂载王鉴未读红点
+      if (a.dataset.id === "wx" && S.wjUnread > 0) {
         const b = document.createElement("span"); b.className = "badge"; b.textContent = S.wjUnread; a.appendChild(b);
       }
     });
@@ -131,7 +140,6 @@
     log(m.from + " 正在输入…");
     setTimeout(() => fireWJ(trigger), delay || 1400);
   }
-  // 开局连发：boot 立即，qa 数秒后自动到（像真人在连续聊）
   function ensureBoot() {
     if (S.wj.indexOf(0) < 0) fireWJ("boot");
     if (S.wj.indexOf(1) < 0) setTimeout(() => fireWJ("qa"), 4200);
@@ -158,7 +166,6 @@
     S.death = true; store.save({ death: true });
     buildBreaking(true);
   }
-  /* 屏幕破碎：注入裂痕叠层（一次性，自动褪去） */
   function screenShatter() {
     if (reduceMotion || !S.fx) return;
     let svg = document.getElementById("shatter");
@@ -178,12 +185,7 @@
     svg.classList.remove("go"); void svg.offsetWidth; svg.classList.add("go");
     setTimeout(() => svg.classList.remove("go"), 1500);
   }
-  /* =====================================================================
-   *  终局头条（五男跳楼 · 跪拜 · 眉心黑印）
-   *  读完伏笔笔记（n=22）即弹出：先屏幕破碎+晃动+出血，再落头条新闻卡。
-   * ===================================================================== */
   function buildBreaking(perform) {
-    // 已展示过一次 / 真相已解 → 不再弹（避免每页加载反复闪屏）
     if (S.bkShown || S.truth) return;
     const H = D.HEADLINE;
     const overlay = document.createElement("div");
@@ -223,13 +225,12 @@
     return overlay;
   }
   /* =====================================================================
-   *  王鉴保护弹窗（iOS 通知式；同一 UI 浮层；点击 → msgs.html）
-   *  检索死者后自动弹出，保护玩家不再陷。
+   *  王鉴保护弹窗（iOS 通知式 · 点击 → wx.html）
    * ===================================================================== */
-  const WJ_PROTECT_TEXT = "别再查了。他们已经死了。继续只会让你陷得更深。\n去讯息里看完我说的，再回来。";
+  const WJ_PROTECT_TEXT = "别再查了。他们已经死了。继续只会让你陷得更深。\n去微信里看完我说的话，再回来。";
   const WJ_FIVE = ["刘希夷", "麻三", "孙师", "贾生", "迟浩亮"];
   function maybeShowWangjianProtect(personKey) {
-    if (S.truth) return; // 真相已解，无需保护
+    if (S.truth) return;
     if (!WJ_FIVE.includes(personKey)) return;
     if (S.wjProtectDismissed.indexOf(personKey) >= 0) return;
     S.wjProtectDismissed.push(personKey);
@@ -244,35 +245,13 @@
     modal.setAttribute("role", "button");
     modal.innerHTML =
       '<div class="wj-protect-card">' +
-        '<div class="wj-protect-head"><span class="wj-protect-from">修车师傅</span><span class="wj-protect-meta">讯息</span></div>' +
+        '<div class="wj-protect-head"><span class="wj-protect-from">修车师傅</span><span class="wj-protect-meta">微信</span></div>' +
         '<div class="wj-protect-text">' + WJ_PROTECT_TEXT + "</div>" +
         '<div class="wj-protect-action">[ 点击查看完整对话 → ]</div>' +
       "</div>";
-    modal.onclick = () => { location.href = "msgs.html"; };
+    modal.onclick = () => { location.href = "wx.html"; };
     document.body.appendChild(modal);
     if (S.audio) { ensureAudio(); sting(1); }
-  }
-  function showJuebi() {
-    const m = D.WANGJIAN.find((x) => x.trigger === "finale");
-    const text =
-      "刘希夷绝笔\n" +
-      "守玄雷坛已被邪魔侵蚀。这里不是我一个人能守住的，需要更多人的帮助。\n" +
-      "如果你看见了，请把这部手机分享出去。";
-    const modal = document.createElement("div");
-    modal.className = "juebi-modal";
-    modal.innerHTML =
-      '<div class="jb-card">' +
-        '<pre class="jb-text">' + text + "</pre>" +
-        '<div class="jb-actions">' +
-          '<button id="jbShare" type="button">分享这部手机</button>' +
-          '<button id="jbCopy" type="button">复制绝笔</button>' +
-        "</div>" +
-        (m ? '<div class="jb-wj"><div class="wj-from">' + m.from + " · 最后一讯息</div><div class=\"wj-text\">" + m.text.replace(/\n/g, "<br/>") + "</div></div>" : "") +
-      "</div>";
-    document.body.appendChild(modal);
-    modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
-    $("#jbShare").addEventListener("click", () => doShare(text));
-    $("#jbCopy").addEventListener("click", () => { copyText(text); flash(null, "已复制"); });
   }
   function doShare(text) {
     const url = location.href;
@@ -297,7 +276,7 @@
   function flash(btn, msg) { if (btn) { const old = btn.textContent; btn.textContent = msg; setTimeout(() => (btn.textContent = old), 1400); } else { log(msg); } }
 
   /* =====================================================================
-   *  检索（真实笔记 + 群聊 + 反应式）+ 人像（真实图）
+   *  检索（人物/术语/群聊/反应式）
    * ===================================================================== */
   function portraitSVG(p) {
     const frame = p.deceased ? "var(--anti-paper)" : "var(--iron)";
@@ -319,7 +298,6 @@
     const alias = (p.alias && p.alias.length) ? `<p class="muted" style="font-size:.78rem;margin-top:6px">别名：${p.alias.join("、")}</p>` : "";
     const bio = (p.line) ? `<p class="p-bio">${p.line}</p>` : "";
     const age = (p.age != null) ? `<p class="muted" style="font-size:.74rem;margin-top:4px">约 ${p.age} 岁</p>` : "";
-    // 检索人物即渗血（无论生死 / 是否真图）；reduced-motion 下静态血迹
     const bleed = '<div class="blood"></div>';
     return `<div class="person">
       <div class="portrait ${p.deceased ? "death" : ""} bleading">
@@ -383,7 +361,6 @@
     });
   }
   function luoshuHTML() {
-    const rows = [["", "坎一", "坤二", "震三", "巽四", "中五", "乾六", "兑七", "艮八", "离九"]];
     const bodyRows = D.LUOSHU.body.map((r) =>
       `<tr><td style="color:var(--cinnabar-gold)">${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("");
     return `<div class="result"><h4>洛书九宫 · 配数 + 人身造化</h4>
@@ -509,7 +486,7 @@
   }
 
   /* =====================================================================
-   *  刘希夷的笔记（第一人称 · 带日期时间 · 渐进解锁）
+   *  笔记（公历 · 渐进解锁）
    * ===================================================================== */
   function renderNotes() {
     const list = D.DAILY_NOTES.map((c) => {
@@ -537,68 +514,9 @@
   }
 
   /* =====================================================================
-   *  群聊（残存记录，成员匿名 A–E，玩家自猜）
+   *  朋友圈（公历 · 无年龄）
    * ===================================================================== */
-  function renderChats() {
-    const list = D.GROUP_CHATS.map((g) => {
-      const ok = S[g.unlock];
-      if (ok) return `<div class="chap" data-id="${g.id}"><div class="n">${g.name}</div><div class="t">${g.tag}</div></div>`;
-      return `<div class="chap locked"><div class="n">待解</div><div class="t muted">〔未启〕</div></div>`;
-    }).join("");
-    const html = `
-      <div class="chaplist">${list}</div>
-      <div id="chatHost"></div>`;
-    showPage("群聊 · 残存记录", html, () => {
-      const host = $("#chatHost");
-      document.querySelectorAll(".chap:not(.locked)").forEach((el) =>
-        el.addEventListener("click", () => {
-          const g = D.GROUP_CHATS.find((x) => x.id === el.dataset.id);
-          const lines = g.msgs.map((m) =>
-            `<div class="chat-line"><span class="who">${m.from}</span><div class="txt">${m.text}</div></div>`).join("");
-          host.innerHTML =
-            `<div class="chap-body"><h3>${g.name}</h3>
-              <div class="meta">${g.tag}</div>
-              <p class="muted" style="font-size:.8rem;margin:6px 0 12px">${g.intro}</p>
-              <div class="bubbles">${lines}</div></div>`;
-          if (S.read.indexOf(g.id) < 0) { S.read.push(g.id); store.save({ read: S.read }); }
-          log("阅群：" + g.name);
-          checkDeath(); sync();
-        }));
-    });
-  }
-
-  /* =====================================================================
-   *  私信（1对1；成员匿名 A–E）
-   * ===================================================================== */
-  function renderDMs() {
-    const list = D.PRIVATE_MSGS.map((c) =>
-      `<div class="chap dm" data-w="${c.with}">
-        <img class="dm-ava" src="${c.img}" alt="${c.name}" loading="lazy">
-        <div class="n">${c.name}</div><div class="t muted">私信</div>
-      </div>`).join("");
-    const html = `<div class="chaplist dmlist">${list}</div><div id="dmHost"></div>`;
-    showPage("私信 · 残存对话", html, () => {
-      const host = $("#dmHost");
-      document.querySelectorAll(".chap.dm").forEach((el) =>
-        el.addEventListener("click", () => {
-          const c = D.PRIVATE_MSGS.find((x) => x.with === el.dataset.w);
-          const lines = c.msgs.map((m) => {
-            const me = m.from === "我";
-            return `<div class="dm-line ${me ? "me" : ""}"><span class="who">${m.from}</span><div class="txt">${m.text}</div></div>`;
-          }).join("");
-          const photo = c.photo ? `<img class="dm-photo" src="${c.photo}" alt="共享图" loading="lazy">` : "";
-          host.innerHTML =
-            `<div class="chap-body"><h3>与 ${c.name} 的私信</h3>
-              <div class="bubbles dm-bubbles">${lines}${photo}</div></div>`;
-          log("阅私信：" + c.name);
-        }));
-    });
-  }
-
-  /* =====================================================================
-   *  朋友圈（图文动态；成员匿名 A–E）
-   * ===================================================================== */
-  function renderMoments() {
+  function renderMomentsHTML() {
     const cards = D.MOMENTS.map((m) => {
       const photo = m.photo ? `<img class="mo-photo" src="${m.photo}" alt="动态图" loading="lazy">` : "";
       return `<div class="mo-card">
@@ -606,33 +524,150 @@
         <p class="mo-text">${m.text}</p>${photo}
       </div>`;
     }).join("");
-    showPage("朋友圈 · 残存动态", `<div class="mo-feed">${cards}</div>`);
+    return `<div class="mo-feed">${cards}</div>`;
   }
 
   /* =====================================================================
-   *  讯息（王鉴来信，唯一主动提醒来源）
+   *  微信（wx.html）—— 私聊 / 群聊 / 朋友圈 三 tab
    * ===================================================================== */
-  function renderMsg() {
-    const msgs = D.WANGJIAN.filter((m) => S.wj.indexOf(m.id) >= 0)
-      .sort((a, b) => a.id - b.id);
-    const html = msgs.length
-      ? `<div class="msgs">${msgs.map((m) =>
-          `<div class="msg-item"><div class="msg-from">${m.from}</div><div class="msg-text">${m.text.replace(/\n/g, "<br/>")}</div></div>`).join("")}</div>`
-      : `<p class="muted center" style="padding:40px">暂无新讯息。</p>`;
-    showPage("讯息 · 未知发信人", html, () => {
-      if (S.wjUnread > 0) { S.wjUnread = 0; store.save({ wjUnread: 0 }); sync(); }
+  function renderWX() {
+    const tab = S.wxTab || "chats";
+    const tabs = [
+      { id: "chats", nm: "私聊" },
+      { id: "groups", nm: "群聊" },
+      { id: "moments", nm: "朋友圈" },
+    ];
+    const tabBar = '<nav class="wx-tabbar">' +
+      tabs.map((t) => `<a class="wx-tab ${t.id === tab ? "on" : ""}" data-tab="${t.id}" href="#${t.id}">${t.nm}</a>`).join("") +
+      '</nav>';
+
+    let body = "";
+    if (tab === "chats") body = renderWXChatsHTML();
+    else if (tab === "groups") body = renderWXGroupsHTML();
+    else body = renderMomentsHTML();
+
+    showPage("微信", tabBar + body, () => {
+      document.querySelectorAll(".wx-tab").forEach((el) =>
+        el.addEventListener("click", (e) => {
+          e.preventDefault();
+          S.wxTab = el.dataset.tab; store.save({ wxTab: S.wxTab });
+          renderWX();
+        }));
+      document.querySelectorAll(".wx-chat-item").forEach((el) =>
+        el.addEventListener("click", () => openWXChat(el.dataset.key)));
+      document.querySelectorAll(".wx-group-item:not(.locked)").forEach((el) =>
+        el.addEventListener("click", () => openWXGroup(el.dataset.id)));
     });
   }
 
-  /* =====================================================================
-   *  SVG 占位（仅保留 黑纸辨识 所需的 朱书 / 白书）
-   * ===================================================================== */
-  function svgZhuShu() { return `<svg viewBox="0 0 100 120"><rect width="100" height="120" fill="var(--fan-paper)"/><path d="M50 14 V108 M28 26 H72 M36 44 H64 M32 62 H68 M44 84 H56" stroke="var(--cinnabar)" stroke-width="3" fill="none"/><text x="50" y="34" font-size="11" fill="var(--cinnabar)" text-anchor="middle">应水火雷铁</text></svg>`; }
-  function svgBaiShu() { return `<svg viewBox="0 0 100 120"><rect width="100" height="120" fill="var(--anti-paper)"/><path d="M30 108 V14 M72 96 H28 M64 78 H36 M68 60 H32 M56 38 H44" stroke="var(--can-bai)" stroke-width="2.4" fill="none" stroke-dasharray="2 2"/></svg>`; }
+  function renderWXChatsHTML() {
+    // 修车师傅（王鉴）—— 永远置顶
+    const wjMsgs = D.WANGJIAN.filter((m) => S.wj.indexOf(m.id) >= 0).sort((a, b) => a.id - b.id);
+    const lastWJ = wjMsgs.length ? wjMsgs[wjMsgs.length - 1] : null;
+    const wjPreview = lastWJ ? (lastWJ.text.length > 32 ? lastWJ.text.slice(0, 32) + "…" : lastWJ.text) : "（暂无消息）";
+    const wjItem = `<div class="wx-chat-item" data-key="wj">
+      <img class="wx-ava" src="${D.PEOPLE["王鉴"].img}" alt="修车师傅" loading="lazy">
+      <div class="wx-chat-info">
+        <div class="wx-chat-name">修车师傅</div>
+        <div class="wx-chat-preview">${wjPreview.replace(/\n/g, " ")}</div>
+      </div>
+      <div class="wx-chat-meta">${lastWJ ? "在线" : ""}</div>
+    </div>`;
+
+    const dmItems = D.PRIVATE_MSGS.map((c) => {
+      const last = c.msgs[c.msgs.length - 1];
+      const preview = last.text.length > 32 ? last.text.slice(0, 32) + "…" : last.text;
+      return `<div class="wx-chat-item" data-key="${c.with}">
+        <img class="wx-ava" src="${c.img}" alt="${c.name}" loading="lazy">
+        <div class="wx-chat-info">
+          <div class="wx-chat-name">${c.name}</div>
+          <div class="wx-chat-preview">${preview}</div>
+        </div>
+        <div class="wx-chat-meta">在线</div>
+      </div>`;
+    }).join("");
+
+    return `<div class="wx-chat-list">${wjItem}${dmItems}</div>`;
+  }
+
+  function openWXChat(key) {
+    if (key === "wj") {
+      const msgs = D.WANGJIAN.filter((m) => S.wj.indexOf(m.id) >= 0).sort((a, b) => a.id - b.id);
+      const bubbles = msgs.map((m) =>
+        `<div class="wx-bubble">
+          <img class="wx-ava-sm" src="${D.PEOPLE["王鉴"].img}" alt="修车师傅" loading="lazy">
+          <div class="wx-bubble-text">${m.text.replace(/\n/g, "<br/>")}</div>
+        </div>`).join("");
+      const html = `<div class="wx-chat-detail">
+        <div class="wx-chat-header"><button class="wx-back" type="button">‹</button><span class="wx-chat-name">修车师傅</span></div>
+        <div class="wx-bubbles">${bubbles || '<p class="muted center" style="padding:20px">暂无消息</p>'}</div>
+      </div>`;
+      showPage("修车师傅", html, () => {
+        if (S.wjUnread > 0) { S.wjUnread = 0; store.save({ wjUnread: 0 }); sync(); }
+        $(".wx-back").onclick = () => { S.wxTab = "chats"; renderWX(); };
+      });
+      return;
+    }
+    const c = D.PRIVATE_MSGS.find((x) => x.with === key);
+    if (!c) return;
+    const bubbles = c.msgs.map((m) => {
+      const me = m.from === "我";
+      const ava = me ? D.PEOPLE["刘希夷"].img : c.img;
+      return `<div class="wx-bubble ${me ? "me" : ""}">
+        <img class="wx-ava-sm" src="${ava}" alt="${m.from}" loading="lazy">
+        <div class="wx-bubble-text">${m.text.replace(/\n/g, "<br/>")}</div>
+      </div>`;
+    }).join("");
+    const photo = c.photo ? `<img class="wx-photo" src="${c.photo}" alt="共享图" loading="lazy">` : "";
+    const html = `<div class="wx-chat-detail">
+      <div class="wx-chat-header"><button class="wx-back" type="button">‹</button><span class="wx-chat-name">${c.name}</span></div>
+      <div class="wx-bubbles">${bubbles}${photo}</div>
+    </div>`;
+    showPage(c.name, html, () => {
+      $(".wx-back").onclick = () => { S.wxTab = "chats"; renderWX(); };
+    });
+  }
+
+  function renderWXGroupsHTML() {
+    const items = D.GROUP_CHATS.map((g) => {
+      const ok = S[g.unlock];
+      if (!ok) return `<div class="wx-group-item locked"><div class="wx-ava wx-ava-ghost">${g.name[0]}</div><div class="wx-chat-info"><div class="wx-chat-name">未启</div><div class="wx-chat-preview muted">〔未启〕</div></div><div class="wx-chat-meta"></div></div>`;
+      const last = g.msgs[g.msgs.length - 1];
+      const preview = last.text.length > 32 ? last.text.slice(0, 32) + "…" : last.text;
+      return `<div class="wx-group-item" data-id="${g.id}">
+        <div class="wx-ava wx-ava-ghost">${g.name[0]}</div>
+        <div class="wx-chat-info">
+          <div class="wx-chat-name">${g.name}</div>
+          <div class="wx-chat-preview">${preview}</div>
+        </div>
+        <div class="wx-chat-meta">${g.msgs.length}</div>
+      </div>`;
+    }).join("");
+    return `<div class="wx-chat-list">${items}</div>`;
+  }
+
+  function openWXGroup(id) {
+    const g = D.GROUP_CHATS.find((x) => x.id === id);
+    if (!g) return;
+    const lines = g.msgs.map((m) =>
+      `<div class="wx-bubble ${m.from === "我" ? "me" : ""}">
+        <img class="wx-ava-sm" src="${(m.from === "我" ? D.PEOPLE["刘希夷"].img : (D.PEOPLE[A_TO_NAME[m.from]] || {img:""}).img) || ""}" alt="${m.from}" onerror="this.style.visibility='hidden'">
+        <div class="wx-bubble-text"><span class="wx-bubble-who">${m.from}</span>${m.text}</div>
+      </div>`).join("");
+    const html = `<div class="wx-chat-detail">
+      <div class="wx-chat-header"><button class="wx-back" type="button">‹</button><span class="wx-chat-name">${g.name}</span></div>
+      <div class="wx-group-intro muted">${g.intro}</div>
+      <div class="wx-bubbles">${lines}</div>
+    </div>`;
+    showPage(g.name, html, () => {
+      $(".wx-back").onclick = () => { S.wxTab = "groups"; renderWX(); };
+    });
+  }
+  // 群聊匿名 A–E → 真实人物映射（用于显示头像）
+  const A_TO_NAME = { A: "麻三", B: "孙师", C: "贾生", D: "迟浩亮", E: "沈佳诚", 群主: "黑律叛师", "道友·甲": "", "道友·乙": "", "道友·丙": "" };
 
   /* =====================================================================
-   *  新闻流（残存于回收手机；含沈某投稿）
-   *  v6：去掉「拼出真相」按钮；改由沈某投稿末尾「已阅 · 继续」触发真相浮窗。
+   *  新闻流（含沈某投稿 → 已阅·继续 触发真相浮窗）
    * ===================================================================== */
   function renderNews() {
     const items = (D.NEWS || []).map((n, idx) => {
@@ -642,6 +677,7 @@
         : "";
       return `<div class="news-item">
         <div class="news-src">${n.src}<span class="news-tag">${n.tag || ""}</span></div>
+        ${n.date ? '<div class="news-date muted">' + n.date + '</div>' : ''}
         <h4 class="news-title">${n.title}</h4>
         <p class="news-text">${n.text.replace(/\n/g, "<br/>")}</p>
         ${continueBtn}
@@ -658,9 +694,7 @@
   }
 
   /* =====================================================================
-   *  真相浮窗（modal 弹出替代独立按钮 / 独立页）
-   *  触发：读完沈某投稿末尾 / 直接访问 truth.html
-   *  解出后 S.truth = true，不再出现（除非直接访问 truth.html 看答案）
+   *  真相浮窗（modal · 沈某投稿末尾触发 · 直接访问 truth.html 弹窗）
    * ===================================================================== */
   function norm(s) { return (s || "").replace(/\s+/g, "").trim(); }
   function showTruthModal() {
@@ -668,10 +702,8 @@
     const modal = document.createElement("div");
     modal.id = "truth-modal";
     modal.className = "truth-modal-overlay";
-
     const card = document.createElement("div");
     card.className = "truth-modal-card";
-
     if (S.truth) {
       card.innerHTML =
         '<button class="truth-modal-close" type="button" aria-label="关闭">×</button>' +
@@ -697,17 +729,10 @@
     }
     modal.appendChild(card);
     document.body.appendChild(modal);
-
-    // 关闭
-    card.querySelector(".truth-modal-close").onclick = (e) => {
-      e.stopPropagation();
-      modal.remove();
-    };
-    // 点击遮罩关闭（仅未解出状态）
+    card.querySelector(".truth-modal-close").onclick = (e) => { e.stopPropagation(); modal.remove(); };
     if (!S.truth) {
       modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
     }
-
     if (!S.truth) {
       card.querySelector("#tkGo").onclick = () => {
         const got = D.TRUTH.fields.map((_, i) => norm(card.querySelector("#tk" + i).value));
@@ -717,7 +742,7 @@
           S.truth = true; store.save({ truth: true });
           horror(3);
           modal.remove();
-          showTruthModal(); // 重新挂载，渲染「已解」版
+          showTruthModal();
         } else {
           const m = card.querySelector("#tkMsg");
           m.className = "truth-msg err"; m.textContent = "不对。生辰对不上。";
@@ -728,70 +753,26 @@
       horror(3);
     }
   }
-
-  /* 直接访问 truth.html 时渲染浮窗（不渲染页面内容） */
   function renderTruth() {
-    // 临时清空 pageBody 以让浮窗独占视口
     const host = $("#pageBody"); if (host) host.innerHTML = "";
     showTruthModal();
   }
 
   /* =====================================================================
-   *  论坛（路遥提示刘希夷前往查线索）
-   *  登录：WeChat 账号 + 密码（真名 + 生辰年干支）
+   *  论坛（开放浏览 · 已知账号仅路遥）
    * ===================================================================== */
-  function forumCheckLogin(user, pass) {
-    const member = (D.FORUM.members || []).find((m) => m.wechat === user);
-    if (!member) return { ok: false, msg: "WeChat 不存在。" };
-    const p = D.PEOPLE[member.realName];
-    if (!p || !p.birthday) return { ok: false, msg: "账号资料缺失。" };
-    const expected = p.name + p.birthday.stemBranch;
-    if (pass !== expected) return { ok: false, msg: "密码不对。想想：真名 + 生辰年干支。" };
-    return { ok: true, member };
-  }
   function renderForum() {
-    if (S.forumUser) { renderForumList(); return; }
-    const memberList = (D.FORUM.members || []).map((m) =>
-      '<li><code>' + m.wechat + '</code> · ' + m.name + '</li>').join("");
-    const html =
-      '<div class="forum-login">' +
-        '<h3>' + D.FORUM.title + '</h3>' +
-        '<p class="forum-sub muted">' + D.FORUM.subtitle + '</p>' +
-        '<p class="forum-hint muted">' + D.FORUM.loginHint + '</p>' +
-        '<div class="forum-login-form">' +
-          '<label>WeChat</label>' +
-          '<input id="forumUser" autocomplete="off" spellcheck="false" />' +
-          '<label>密码</label>' +
-          '<input id="forumPass" type="password" autocomplete="off" />' +
-          '<button id="forumGo" type="button">登 录</button>' +
-          '<p id="forumMsg"></p>' +
-        '</div>' +
-        '<details class="forum-member-list">' +
-          '<summary>已知账号（点开看）</summary>' +
-          '<ul>' + memberList + '</ul>' +
-        '</details>' +
+    const k = D.FORUM.known;
+    const knownCard =
+      '<div class="forum-known">' +
+        '<div class="forum-known-title">已知账号</div>' +
+        '<div class="forum-known-row"><span class="lbl">WeChat</span><code>' + k.wechat + '</code></div>' +
+        '<div class="forum-known-row"><span class="lbl">昵称</span>' + k.name + '</div>' +
+        '<div class="forum-known-row"><span class="lbl">真名</span>' + k.realName + '</div>' +
+        '<div class="forum-known-row"><span class="lbl">生日</span>' + k.birthday + '</div>' +
+        '<div class="forum-known-row"><span class="lbl">密码</span><code>' + k.password + '</code></div>' +
+        '<div class="forum-known-note muted">' + k.note + '</div>' +
       '</div>';
-    showPage("论坛 · 登录", html, () => {
-      const userEl = $("#forumUser"), passEl = $("#forumPass"), msgEl = $("#forumMsg"), btn = $("#forumGo");
-      function tryLogin() {
-        const u = (userEl.value || "").trim();
-        const p = passEl.value || "";
-        const r = forumCheckLogin(u, p);
-        if (!r.ok) {
-          msgEl.className = "err"; msgEl.textContent = r.msg;
-          horror(1); return;
-        }
-        S.forumUser = r.member.wechat;
-        store.save({ forumUser: S.forumUser });
-        msgEl.className = "ok"; msgEl.textContent = "登录成功：以 " + r.member.name + " 身份进入。";
-        setTimeout(renderForumList, 600);
-      }
-      btn.onclick = tryLogin;
-      passEl.addEventListener("keydown", (e) => { if (e.key === "Enter") tryLogin(); });
-    });
-  }
-  function renderForumList() {
-    const me = (D.FORUM.members || []).find((m) => m.wechat === S.forumUser);
     const list = (D.FORUM.threads || []).map((t) =>
       '<div class="forum-thread-item" data-id="' + t.id + '">' +
         '<div class="forum-thread-title">' + t.title + '</div>' +
@@ -803,15 +784,11 @@
       '</div>').join("");
     const html =
       '<div class="forum-wrap">' +
-        '<div class="forum-bar">' +
-          '<span class="forum-me muted">登录身份：' + (me ? me.name : S.forumUser) + '</span>' +
-          '<button id="forumLogout" type="button" class="forum-logout">登出</button>' +
-        '</div>' +
+        knownCard +
         '<div class="forum-thread-list">' + list + '</div>' +
         '<div id="forumThreadHost"></div>' +
       '</div>';
     showPage("论坛 · 同道杂谈", html, () => {
-      $("#forumLogout").onclick = () => { S.forumUser = null; store.save({ forumUser: null }); renderForum(); };
       document.querySelectorAll(".forum-thread-item").forEach((el) =>
         el.addEventListener("click", () => {
           const t = D.FORUM.threads.find((x) => x.id === el.dataset.id);
@@ -830,9 +807,16 @@
               '</div>' +
               posts +
             '</div>';
+          window.scrollTo(0, document.body.scrollHeight);
         }));
     });
   }
+
+  /* =====================================================================
+   *  SVG 占位（黑纸辨识 · 朱书 / 白书）
+   * ===================================================================== */
+  function svgZhuShu() { return `<svg viewBox="0 0 100 120"><rect width="100" height="120" fill="var(--fan-paper)"/><path d="M50 14 V108 M28 26 H72 M36 44 H64 M32 62 H68 M44 84 H56" stroke="var(--cinnabar)" stroke-width="3" fill="none"/><text x="50" y="34" font-size="11" fill="var(--cinnabar)" text-anchor="middle">应水火雷铁</text></svg>`; }
+  function svgBaiShu() { return `<svg viewBox="0 0 100 120"><rect width="100" height="120" fill="var(--anti-paper)"/><path d="M30 108 V14 M72 96 H28 M64 78 H36 M68 60 H32 M56 38 H44" stroke="var(--can-bai)" stroke-width="2.4" fill="none" stroke-dasharray="2 2"/></svg>`; }
 
   /* =====================================================================
    *  启动
@@ -843,12 +827,9 @@
     { id: "bw", ico: "📜", nm: "黑纸辨识", gate: "qa", href: "bw.html" },
     { id: "qc", ico: "☯", nm: "人身造化", gate: "qb", href: "qc.html" },
     { id: "notes", ico: "📓", nm: "笔记", gate: "", href: "notes.html" },
-    { id: "chats", ico: "💬", nm: "群聊", gate: "", href: "chats.html" },
-    { id: "dms", ico: "✉", nm: "私信", gate: "", href: "dms.html" },
-    { id: "moments", ico: "🌄", nm: "朋友圈", gate: "", href: "moments.html" },
+    { id: "wx", ico: "💬", nm: "微信", gate: "", href: "wx.html" },
     { id: "forum", ico: "💭", nm: "论坛", gate: "", href: "forum.html" },
     { id: "news", ico: "📰", nm: "新闻", gate: "", href: "news.html" },
-    { id: "msg", ico: "✉", nm: "讯息", gate: "", href: "msgs.html" },
   ];
   function initHub() {
     const grid = $("#appgrid");
@@ -864,6 +845,7 @@
     });
     $("#btnAudio") && $("#btnAudio").addEventListener("click", () => setAudio(!S.audio));
     $("#btnFx") && $("#btnFx").addEventListener("click", () => setFx(!S.fx));
+    $("#btnReset") && $("#btnReset").addEventListener("click", clearData);
     setInterval(() => { const d = new Date(); $("#sbClock").textContent = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); }, 1000);
     $("#sbClock").textContent = "--:--";
     sync();
@@ -877,8 +859,8 @@
     if (S.death) buildBreaking(false);
     const map = {
       search: renderSearch, vault: renderVault, bw: renderBW, qc: renderQC,
-      notes: renderNotes, chats: renderChats, dms: renderDMs, moments: renderMoments,
-      forum: renderForum, news: renderNews, truth: renderTruth, msgs: renderMsg,
+      notes: renderNotes, news: renderNews, forum: renderForum, truth: renderTruth,
+      wx: renderWX,
     };
     if (map[page]) map[page]();
     sync();
