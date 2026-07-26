@@ -118,6 +118,39 @@
     n.frequency.setValueAtTime(95, t); n.frequency.exponentialRampToValueAtTime(38, t + 0.8);
     n.connect(g); n.start(t); n.stop(t + 0.9);
   }
+  function playUnlock() {
+    if (!S.audio) return;
+    ensureAudio(); if (!AC) return;
+    const t = AC.currentTime;
+    const notes = [880, 1318.5]; // A5 → E6，类 iOS 解锁上行双音
+    notes.forEach((f, i) => {
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.type = "sine"; o.frequency.value = f;
+      const tt = t + i * 0.09;
+      g.gain.setValueAtTime(0.0001, tt);
+      g.gain.exponentialRampToValueAtTime(0.22, tt + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, tt + 0.42);
+      o.connect(g); g.connect(AC.destination);
+      o.start(tt); o.stop(tt + 0.44);
+    });
+  }
+  function playError() {
+    if (!S.audio) return;
+    ensureAudio(); if (!AC) return;
+    const t = AC.currentTime;
+    // 类 iOS 密码错误：两声下行低方波 buzz
+    [0, 0.22].forEach((off, i) => {
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.type = "square"; o.frequency.value = i ? 160 : 200;
+      const tt = t + off;
+      g.gain.setValueAtTime(0.0001, tt);
+      g.gain.exponentialRampToValueAtTime(0.16, tt + 0.01);
+      g.gain.setValueAtTime(0.16, tt + 0.1);
+      g.gain.exponentialRampToValueAtTime(0.0001, tt + 0.16);
+      o.connect(g); g.connect(AC.destination);
+      o.start(tt); o.stop(tt + 0.18);
+    });
+  }
   function horror(level) {
     if (!S.fx) return;
     const cls = reduceMotion ? ["fx-vignette"] : ["fx-vignette", "fx-glitch", "fx-flicker"];
@@ -1225,10 +1258,12 @@
           }
           if (v === "060226") {
             S.forumUnlocked = true; store.save({ forumUnlocked: true });
+            if (S.audio) playUnlock();
             renderForum();
           } else {
             msg.className = "forum-known-msg err"; msg.textContent = "不对。";
-            horror(2);
+            playError();
+            if (S.fx) { document.body.classList.add("fx-glitch", "fx-flicker"); setTimeout(() => document.body.classList.remove("fx-glitch", "fx-flicker"), 600); }
           }
         };
         go.onclick = tryUnlock;
