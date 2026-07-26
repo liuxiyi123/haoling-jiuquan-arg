@@ -332,13 +332,20 @@ body.fx-flicker #app{animation:flick .5s steps(3) 2}
 /* 人物简介（检索后展示） */
 .person .p-bio{font-size:.8rem;color:var(--txt-dim);line-height:1.8;margin-top:10px;text-align:left;padding:0 6px}
 
-/* 年龄乱码：终章前隐藏真实年龄 */
-.age-garbled{
+/* 年龄马赛克：终章前隐藏真实年龄（路遥除外） */
+.age-mosaic{
   display:inline-block;
   color:var(--txt-dim);
-  letter-spacing:.04em;
-  filter:blur(2.6px) opacity(.55);
+  letter-spacing:.12em;
+  font-weight:600;
+  background:linear-gradient(135deg, #3a3a3a 25%, #555 25%, #555 50%, #3a3a3a 50%, #3a3a3a 75%, #555 75%);
+  background-size:6px 6px;
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent;
+  filter:blur(2.8px) opacity(.58);
   user-select:none;
+  cursor:default;
 }
 
 /* 终局头条（五男跳楼 · 跪拜 · 眉心黑印） */

@@ -38,7 +38,7 @@ window.HLJQ_DATA = (function () {
       alias: ["朽孽翁", "希夷"], tag: "本门 · 法官", age: 18, img: IMG + "portrait-liuxiyi.jpg",
       wechat: "xuanlei_xiyi",
       birthday: { stemBranch: "戊子", year: 2008, month: 6, day: 7, zodiac: "鼠" },
-      line: "十八岁，南阳守玄雷坛传承弟子，北帝酆岳派法官，号朽孽翁。稍胖壮，长发，常捏着冰爆珠烟压惊。",
+      line: "南阳守玄雷坛传承弟子，北帝酆岳派法官，号朽孽翁。稍胖壮，长发，常捏着冰爆珠烟压惊。",
     },
     "王付岩": {
       alias: ["度师"], tag: "已故 · 师脉", age: null, img: "",
@@ -60,7 +60,7 @@ window.HLJQ_DATA = (function () {
       alias: ["千寻"], tag: "同道 · 灵宝", age: 20, img: IMG + "portrait-qianxun.jpg",
       wechat: "lingbao_qianxun",
       birthday: { stemBranch: "丙戌", year: 2006, month: 6, day: 7, zodiac: "狗" },
-      line: "二十岁，网名千寻，刘希夷称其师傅。主灵宝斋醮科仪、度亡炼度。瘦，长发，原大连人，迁居重庆。",
+      line: "网名千寻，刘希夷称其师傅。主灵宝斋醮科仪、度亡炼度。瘦，长发，原大连人，迁居重庆。",
     },
     "贾生": {
       alias: ["王范家传"], tag: "同道 · 西河铁师", age: 23, img: IMG + "portrait-jiasheng.jpg",
@@ -72,13 +72,13 @@ window.HLJQ_DATA = (function () {
       alias: [], tag: "同道 · 奇门风水", age: 22, img: IMG + "portrait-chihaoliang.jpg",
       wechat: "qimen_chi",
       birthday: { stemBranch: "甲申", year: 2004, month: 6, day: 7, zodiac: "猴" },
-      line: "二十二岁，辽宁大连人，在苏州经营奇门风水工作室。只学奇门遁甲与风水堪舆，不学道法科仪。",
+      line: "辽宁大连人，在苏州经营奇门风水工作室。只学奇门遁甲与风水堪舆，不学道法科仪。",
     },
     "沈佳诚": {
       alias: ["桐凤斋"], tag: "同道 · 开面符", age: 18, img: IMG + "portrait-shen-jiacheng.jpg",
       wechat: "tfc_jiacheng",
       birthday: { stemBranch: "戊子", year: 2008, month: 6, day: 7, zodiac: "鼠" },
-      line: "十八岁，网名桐凤斋，浙江嘉兴人。主桐乡开面符＋江南清微，今年刚高考完，准备去杭州中国美院。",
+      line: "网名桐凤斋，浙江嘉兴人。主桐乡开面符＋江南清微，今年刚高考完，准备去杭州中国美院。",
     },
     "黑律叛师": {
       alias: ["五鬼道人"], tag: "反派 · 原酆都法官", age: null, img: "",

@@ -792,12 +792,13 @@
     const tag = p.deceased ? `<span class="tag death">遗照 · 已故</span>` : `<span class="tag">${p.tag}</span>`;
     const alias = (p.alias && p.alias.length) ? `<p class="muted" style="font-size:.78rem;margin-top:6px">别名：${p.alias.join("、")}</p>` : "";
     const bio = (p.line) ? `<p class="p-bio">${p.line}</p>` : "";
-    // 终章前：年龄以乱码掩盖；终章后（shenRead=true）：显示真实年龄
-    const showAge = (p.age != null) && S.shenRead;
+    // 终章前：年龄以马赛克隐藏；路遥(麻三)始终可见；终章后（shenRead=true）：全部显示真实年龄
+    const isLuyao = (name === "麻三");
+    const showAge = (p.age != null) && (S.shenRead || isLuyao);
     const age = (p.age != null)
-      ? (S.shenRead
+      ? (showAge
           ? `<p class="muted" style="font-size:.74rem;margin-top:4px">约 ${p.age} 岁</p>`
-          : `<p class="muted" style="font-size:.74rem;margin-top:4px">约 <span class="age-garbled">██</span> 岁</p>`)
+          : `<p class="muted" style="font-size:.74rem;margin-top:4px">约 <span class="age-mosaic" aria-label="已打码">██</span> 岁</p>`)
       : "";
     const bleed = '<div class="blood"></div>';
     return `<div class="person">
