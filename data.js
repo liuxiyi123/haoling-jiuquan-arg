@@ -304,6 +304,9 @@ window.HLJQ_DATA = (function () {
       text: "照度师规矩，九泉号令重书了一张黑纸朱书。朱砂须以酒调开——酒性烈而透，能把赤金底色激出来。胶调的是死的。" },
     { who: "桐凤斋", img: IMG + "wxtongfengzhai.png", photo: IMG + "tongfengzhai-shufa.png", time: "4月3日 09:40",
       text: "这是今早裱好的『靖定』。法不在速，在定。定住一笔，是一辈子的功夫。" },
+    /* 反法图入库：C 老贾随手晒图，等同道识别来源——暗藏玩家可追的"反酆都"线索 */
+    { who: "西河老贾", img: IMG + "wxjiasheng.png", photo: IMG + "heizhi-baishu.png", time: "3月27日 11:40",
+      text: "网上翻到的鬼画符，骨粉写成。骨粉我认得——这位画的人绝不是野路子。我却认不出他网名。有认得的喊一声，我收。" },
   ];
 
   /* ---------- 新闻流（v8 沿用 v7；沈某投稿仅提属相） ---------- */
