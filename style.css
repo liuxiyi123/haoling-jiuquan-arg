@@ -272,3 +272,57 @@ body.fx-flicker #app{animation:flick .5s steps(3) 2}
 .mo-time{color:var(--txt-dim);font-size:.72rem;margin-left:auto}
 .mo-text{font-size:.9rem;color:var(--txt);line-height:1.85}
 .mo-photo{margin-top:10px;width:100%;border-radius:10px;display:block;border:1px solid var(--line)}
+
+/* 人物简介（检索后展示） */
+.person .p-bio{font-size:.8rem;color:var(--txt-dim);line-height:1.8;margin-top:10px;text-align:left;padding:0 6px}
+
+/* 终局头条（五男跳楼 · 跪拜 · 眉心黑印） */
+#breaking{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:22px;overflow:hidden}
+#breaking .bk-bg{position:absolute;inset:0;background:linear-gradient(180deg,var(--anti-paper),rgba(11,10,12,.55) 70%,rgba(178,58,46,.22));opacity:0;transition:opacity 1.4s ease}
+#breaking.red .bk-bg{opacity:1}
+#breaking.shake{animation:shake .28s linear infinite}
+#breaking .bk-card{position:relative;z-index:2;max-width:560px;width:100%;background:linear-gradient(180deg,rgba(30,27,34,.96),rgba(11,10,12,.98));border:1px solid var(--cinnabar);border-radius:14px;padding:22px 20px;box-shadow:0 0 50px rgba(178,58,46,.5);transform:translateY(14px);opacity:0;transition:transform 1s ease 1s,opacity 1s ease 1s}
+#breaking.red .bk-card{transform:none;opacity:1}
+.bk-kicker{color:var(--cinnabar);font-size:.78rem;letter-spacing:.18em;font-weight:700}
+.bk-title{color:var(--can-bai);font-size:1.32rem;line-height:1.5;margin:8px 0 12px;font-weight:800;letter-spacing:.02em}
+.bk-body{color:var(--txt);font-size:.92rem;line-height:1.95;white-space:pre-line}
+.bk-names{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+.bk-names span{color:var(--txt-dim);font-size:.78rem}
+.bk-names b{color:var(--cinnabar-gold);font-size:.92rem;border:1px solid var(--line);border-radius:6px;padding:2px 9px}
+.bk-tip{margin-top:12px;color:var(--txt-dim);font-size:.8rem;line-height:1.7;border-top:1px dashed var(--line);padding-top:10px}
+.bk-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.bk-actions button{flex:1;min-width:120px;background:var(--cinnabar);border:none;color:var(--qr-white);border-radius:10px;padding:12px;cursor:pointer;font-size:.9rem;letter-spacing:.06em;transition:.16s}
+.bk-actions button:hover{filter:brightness(1.12)}
+.bk-actions button.ghost{background:none;border:1px solid var(--line);color:var(--txt-dim)}
+
+/* 屏幕破碎：裂痕叠层 */
+#shatter{position:fixed;inset:0;z-index:260;pointer-events:none;width:100%;height:100%;opacity:0}
+#shatter.go{animation:shatterGo 1.5s ease forwards}
+@keyframes shatterGo{0%{opacity:0;transform:scale(1.06)}8%{opacity:1}100%{opacity:0;transform:scale(1)}}
+
+/* 新闻流 */
+.news-feed{display:grid;gap:14px;max-width:600px;margin:0 auto}
+.news-item{border:1px solid var(--line);border-left:3px solid var(--cinnabar);border-radius:10px;padding:14px 16px;background:var(--ink-xuan)}
+.news-src{color:var(--txt-dim);font-size:.72rem;letter-spacing:.06em;display:flex;align-items:center;gap:8px}
+.news-tag{background:var(--iron);color:var(--txt);border-radius:6px;padding:1px 7px;font-size:.66rem}
+.news-title{color:var(--cinnabar-gold);font-size:1rem;margin:6px 0 8px;letter-spacing:.02em}
+.news-text{font-size:.88rem;color:var(--txt);line-height:1.85}
+.news-hint{margin-top:14px;text-align:center;font-size:.78rem}
+
+/* 真相锁（生辰年干年支） */
+#pageBody{position:relative}
+.truth-lock{max-width:520px;margin:24px auto;padding:0 6px}
+.truth-prompt{color:var(--can-bai);font-size:1.02rem;line-height:1.8;text-align:center}
+.truth-hint{color:var(--txt-dim);font-size:.8rem;text-align:center;margin:8px 0 18px}
+.truth-fields{display:grid;gap:12px}
+.truth-row{display:flex;align-items:center;gap:12px}
+.truth-row label{color:var(--cinnabar-gold);font-size:.86rem;min-width:120px}
+.truth-in{flex:1;background:var(--ink-xuan);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:11px 12px;font-size:1rem;letter-spacing:.1em;text-align:center}
+.truth-in:focus{outline:none;border-color:var(--cinnabar-gold)}
+#tkGo{display:block;margin:20px auto 0;background:var(--cinnabar);border:none;color:var(--qr-white);border-radius:10px;padding:13px 40px;cursor:pointer;font-size:.96rem;letter-spacing:.2em}
+.truth-msg{min-height:1.2rem;margin-top:12px;text-align:center;font-size:.84rem;color:var(--txt-dim)}
+.truth-msg.err{color:var(--cinnabar)}
+.truth-reveal{max-width:560px;margin:0 auto}
+.truth-seal{display:inline-block;color:var(--cinnabar);border:1px solid var(--cinnabar);border-radius:8px;padding:3px 12px;font-size:.74rem;letter-spacing:.16em;margin-bottom:14px}
+.truth-text{white-space:pre-wrap;color:var(--txt);font-size:.96rem;line-height:2;font-family:inherit;margin:0}
+.truth-blood{position:absolute;left:0;right:0;bottom:0;height:42%;pointer-events:none;background:linear-gradient(180deg,transparent,rgba(120,16,12,.82))}

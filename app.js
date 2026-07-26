@@ -21,7 +21,7 @@
     save(o) { const cur = this.load(); localStorage.setItem(KEY, JSON.stringify(Object.assign(cur, o))); },
   };
   let S = Object.assign(
-    { qa: false, qb: false, qc: false, read: [], wj: [], wjUnread: 0, audio: false, fx: true, bled: [], death: false },
+    { qa: false, qb: false, qc: false, read: [], wj: [], wjUnread: 0, audio: false, fx: true, bled: [], death: false, truth: false },
     store.load()
   );
 
@@ -70,6 +70,7 @@
     if (!S.fx) return;
     const cls = reduceMotion ? ["fx-vignette"] : ["fx-vignette", "fx-glitch", "fx-flicker"];
     document.body.classList.add(...cls);
+    if (level >= 3) screenShatter();
     if (S.audio) sting(level);
     setTimeout(() => document.body.classList.remove(...cls), 900 + level * 350);
   }
@@ -147,53 +148,76 @@
    *  终局（全员殒落）
    * ===================================================================== */
   function deathReady() {
-    const min = (D.DEATH && D.DEATH.minRead) || 19;
-    return S.qa && S.qb && S.qc && S.read.length >= min;
+    const ft = (D.DEATH && D.DEATH.foretellNote);
+    if (ft == null) return false;
+    return S.read.indexOf(ft) >= 0;
   }
   function checkDeath() {
     if (S.death) return;
     if (!deathReady()) return;
     S.death = true; store.save({ death: true });
-    buildDoom(true);
+    buildBreaking(true);
   }
-  function buildDoom(perform) {
-    const overlay = document.createElement("div");
-    overlay.id = "doom";
-    const tiles = document.createElement("div"); tiles.className = "tiles";
-    const N = reduceMotion ? 24 : 46;
-    const cx = 50, cy = 47;
-    for (let i = 0; i < N; i++) {
-      const t = document.createElement("span");
-      t.className = "tile"; t.textContent = "你们都要死";
-      const ang = Math.random() * Math.PI * 2;
-      const rr = Math.pow(Math.random(), 0.55) * 41;
-      const x = cx + Math.cos(ang) * rr * 1.16;
-      const y = cy + Math.sin(ang) * rr * 0.82;
-      const rot = (Math.random() * 30 - 15), sc = 0.5 + Math.random() * 1.4;
-      t.style.left = x.toFixed(2) + "%"; t.style.top = y.toFixed(2) + "%";
-      t.style.transform = "translate(-50%,-50%) rotate(" + rot.toFixed(1) + "deg) scale(" + sc.toFixed(2) + ")";
-      t.style.opacity = (0.34 + Math.random() * 0.52).toFixed(2);
-      t.style.fontSize = (0.8 + Math.random() * 1.6).toFixed(2) + "rem";
-      tiles.appendChild(t);
+  /* 屏幕破碎：注入裂痕叠层（一次性，自动褪去） */
+  function screenShatter() {
+    if (reduceMotion || !S.fx) return;
+    let svg = document.getElementById("shatter");
+    if (!svg) {
+      svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.id = "shatter";
+      svg.setAttribute("viewBox", "0 0 100 100");
+      svg.setAttribute("preserveAspectRatio", "none");
+      const lines = [
+        "M50 50 L8 4 M50 50 L92 10 M50 50 L96 52 M50 50 L70 96 M50 50 L18 94",
+        "M50 50 L30 18 M50 50 L74 30 M50 50 L38 78 M50 50 L62 70 M50 50 L14 46 M50 50 L88 70",
+      ];
+      svg.innerHTML = lines.map((d) => '<path d="' + d + '" stroke="rgba(230,235,240,.85)" stroke-width=".5" fill="none" stroke-linecap="round"/>').join("") +
+        '<circle cx="50" cy="50" r="2.4" fill="rgba(255,255,255,.9)"/>';
+      document.body.appendChild(svg);
     }
-    overlay.appendChild(tiles);
-    const btn = document.createElement("button");
-    btn.className = "juebi-btn"; btn.type = "button"; btn.textContent = "绝笔";
-    btn.style.display = "none";
-    overlay.appendChild(btn);
+    svg.classList.remove("go"); void svg.offsetWidth; svg.classList.add("go");
+    setTimeout(() => svg.classList.remove("go"), 1500);
+  }
+  /* =====================================================================
+   *  终局头条（五男跳楼 · 跪拜 · 眉心黑印）
+   *  读完伏笔笔记（n=22）即弹出：先屏幕破碎+晃动+出血，再落头条新闻卡。
+   * ===================================================================== */
+  function buildBreaking(perform) {
+    const H = D.HEADLINE;
+    const overlay = document.createElement("div");
+    overlay.id = "breaking";
+    overlay.innerHTML =
+      '<div class="bk-bg"></div>' +
+      '<div class="bk-card">' +
+        '<div class="bk-kicker">' + (H.kicker || "突发") + "</div>" +
+        '<h1 class="bk-title">' + H.title + "</h1>" +
+        '<p class="bk-body">' + H.body.replace(/\n/g, "<br/>") + "</p>" +
+        '<div class="bk-names"><span>死者（匿名）：</span>' + H.names.map((n) => "<b>" + n + "</b>").join("") + "</div>" +
+        '<p class="bk-tip">' + (H.tip || "") + "</p>" +
+        '<div class="bk-actions">' +
+          '<button id="bkShare" type="button">分享这部手机</button>' +
+          '<button id="bkTruth" type="button">拼出真相 →</button>' +
+          '<button id="bkClose" type="button" class="ghost">再看一眼</button>' +
+        "</div>" +
+      "</div>";
     document.body.appendChild(overlay);
 
     const motion = S.fx && !reduceMotion;
-    if (motion) overlay.classList.add("shake");
+    if (motion) { overlay.classList.add("shake"); screenShatter(); }
     requestAnimationFrame(() => overlay.classList.add("red"));
-    if (S.audio) { ensureAudio(); sting(3); if (!reduceMotion) setTimeout(() => sting(2), 1300); }
+    if (S.audio) { ensureAudio(); sting(3); if (!reduceMotion) setTimeout(() => sting(2), 1200); }
 
     function finish() {
       fireWJ("finale");
-      btn.style.display = "";
-      btn.onclick = showJuebi;
+      const share = document.getElementById("bkShare");
+      const truth = document.getElementById("bkTruth");
+      const close = document.getElementById("bkClose");
+      if (share) share.onclick = () => doShare(
+        (D.META && D.META.title) + "\n" + H.title + "\n——一部无人认领的手机里，藏着这件事的另一端。");
+      if (truth) truth.onclick = () => { location.href = "truth.html"; };
+      if (close) close.onclick = () => overlay.remove();
     }
-    if (perform) setTimeout(finish, reduceMotion ? 2600 : 6600);
+    if (perform) setTimeout(finish, reduceMotion ? 2200 : 5200);
     else finish();
     return overlay;
   }
@@ -262,6 +286,8 @@
       : portraitSVG(p);
     const tag = p.deceased ? `<span class="tag death">遗照 · 已故</span>` : `<span class="tag">${p.tag}</span>`;
     const alias = (p.alias && p.alias.length) ? `<p class="muted" style="font-size:.78rem;margin-top:6px">别名：${p.alias.join("、")}</p>` : "";
+    const bio = (p.line) ? `<p class="p-bio">${p.line}</p>` : "";
+    const age = (p.age != null) ? `<p class="muted" style="font-size:.74rem;margin-top:4px">约 ${p.age} 岁</p>` : "";
     // 检索人物即渗血（无论生死 / 是否真图）；reduced-motion 下静态血迹
     const bleed = '<div class="blood"></div>';
     return `<div class="person">
@@ -269,7 +295,7 @@
         ${img}${bleed}
       </div>
       <h4 class="pname">${name}${tag}</h4>
-      ${alias}
+      ${alias}${age}${bio}
     </div>`;
   }
   function renderSearch() {
@@ -456,7 +482,7 @@
   function renderNotes() {
     const list = D.DAILY_NOTES.map((c) => {
       const ok = S[c.unlock];
-      if (ok) return `<div class="chap" data-n="${c.n}"><div class="n">${c.date}</div><div class="t">${c.head}</div></div>`;
+      if (ok) return `<div class="chap" data-n="${c.n}"><div class="n">${c.date}</div></div>`;
       return `<div class="chap locked"><div class="n">待解</div><div class="t muted">〔未启〕</div></div>`;
     }).join("");
     const html = `
@@ -468,11 +494,11 @@
         el.addEventListener("click", () => {
           const c = D.DAILY_NOTES.find((x) => x.n == el.dataset.n);
           host.innerHTML =
-            `<div class="chap-body"><h3>${c.head}</h3>
-              <div class="meta">${c.date} ｜ ${c.scene || ""}</div>
+            `<div class="chap-body">
+              <div class="meta">${c.date}</div>
               <p>${c.body}</p></div>`;
           if (S.read.indexOf(c.n) < 0) { S.read.push(c.n); store.save({ read: S.read }); }
-          log("阅：" + c.head);
+          log("阅：" + c.date);
           checkDeath(); sync();
         }));
     });
@@ -573,6 +599,67 @@
   function svgBaiShu() { return `<svg viewBox="0 0 100 120"><rect width="100" height="120" fill="var(--anti-paper)"/><path d="M30 108 V14 M72 96 H28 M64 78 H36 M68 60 H32 M56 38 H44" stroke="var(--can-bai)" stroke-width="2.4" fill="none" stroke-dasharray="2 2"/></svg>`; }
 
   /* =====================================================================
+   *  新闻流（残存于回收手机；含沈某投稿）
+   * ===================================================================== */
+  function renderNews() {
+    const items = (D.NEWS || []).map((n) =>
+      `<div class="news-item">
+        <div class="news-src">${n.src}<span class="news-tag">${n.tag || ""}</span></div>
+        <h4 class="news-title">${n.title}</h4>
+        <p class="news-text">${n.text}</p>
+      </div>`).join("");
+    const hint = `<p class="news-hint muted">沈某的投稿里，藏着五人的生辰。那串干支，是解开「真相」的钥匙。</p>`;
+    showPage("新闻 · 残存剪报", `<div class="news-feed">${items}${hint}</div>`);
+  }
+
+  /* =====================================================================
+   *  真相锁（五人生辰年干年支）
+   * ===================================================================== */
+  function norm(s) { return (s || "").replace(/\s+/g, "").trim(); }
+  function renderTruth() {
+    if (S.truth) { showTruthReveal(); return; }
+    const flds = D.TRUTH.fields.map((f, i) =>
+      `<div class="truth-row">
+        <label>${f.key}${f.age != null ? " · 约" + f.age + "岁" : ""}</label>
+        <input class="truth-in" id="tk${i}" placeholder="${f.placeholder || ""}" autocomplete="off" />
+      </div>`).join("");
+    const html =
+      `<div class="truth-lock">
+        <p class="truth-prompt">${D.TRUTH.prompt}</p>
+        <p class="truth-hint muted">${D.TRUTH.hint}</p>
+        <div class="truth-fields">${flds}</div>
+        <button id="tkGo" type="button">解 锁</button>
+        <p class="truth-msg" id="tkMsg"></p>
+      </div>`;
+    showPage("真相 · 生辰锁", html, () => {
+      const go = $("#tkGo"), msg = $("#tkMsg");
+      go.addEventListener("click", () => {
+        const got = D.TRUTH.fields.map((_, i) => norm($("#tk" + i).value));
+        const ok = got.length === D.TRUTH.answers.length &&
+          got.every((g, i) => g === norm(D.TRUTH.answers[i]));
+        if (ok) {
+          S.truth = true; store.save({ truth: true });
+          showTruthReveal();
+        } else {
+          msg.className = "truth-msg err"; msg.textContent = "不对。生辰对不上。";
+          horror(2);
+        }
+      });
+    });
+  }
+  function showTruthReveal() {
+    const html =
+      `<div class="truth-reveal">
+        <div class="truth-seal">印 · 已解</div>
+        <pre class="truth-text">${D.TRUTH.reveal}</pre>
+      </div>`;
+    showPage("真相 · 已解开", html);
+    horror(3);
+    const host = $("#pageBody");
+    if (host) { const b = document.createElement("div"); b.className = "blood truth-blood"; host.appendChild(b); }
+  }
+
+  /* =====================================================================
    *  启动
    * ===================================================================== */
   const APPS = [
@@ -584,6 +671,8 @@
     { id: "chats", ico: "💬", nm: "群聊", gate: "", href: "chats.html" },
     { id: "dms", ico: "✉", nm: "私信", gate: "", href: "dms.html" },
     { id: "moments", ico: "🌄", nm: "朋友圈", gate: "", href: "moments.html" },
+    { id: "news", ico: "📰", nm: "新闻", gate: "", href: "news.html" },
+    { id: "truth", ico: "🔑", nm: "真相", gate: "", href: "truth.html" },
     { id: "msg", ico: "✉", nm: "讯息", gate: "", href: "msgs.html" },
   ];
   function initHub() {
@@ -603,17 +692,18 @@
     setInterval(() => { const d = new Date(); $("#sbClock").textContent = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); }, 1000);
     $("#sbClock").textContent = "--:--";
     sync();
-    if (S.death) { buildDoom(false); log("终局已至。"); return; }
+    if (S.death) { buildBreaking(false); log("终局已至。"); return; }
     log("数据恢复完成。");
     ensureBoot();
     checkDeath();
   }
   function initPage(page) {
     ensureBoot();
-    if (S.death) buildDoom(false);
+    if (S.death) buildBreaking(false);
     const map = {
       search: renderSearch, vault: renderVault, bw: renderBW, qc: renderQC,
-      notes: renderNotes, chats: renderChats, dms: renderDMs, moments: renderMoments, msgs: renderMsg,
+      notes: renderNotes, chats: renderChats, dms: renderDMs, moments: renderMoments,
+      news: renderNews, truth: renderTruth, msgs: renderMsg,
     };
     if (map[page]) map[page]();
     sync();
