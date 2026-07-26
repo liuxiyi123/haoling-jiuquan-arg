@@ -863,17 +863,14 @@
    *  论坛（开放浏览 · 已知账号仅路遥）
    * ===================================================================== */
   function renderForum() {
-    const k = D.FORUM.known;
     const locked = !S.forumUnlocked;
     const loginCard =
       (locked
         ? '<div class="forum-login">' +
-            '<div class="forum-login-title">登录查看帖子</div>' +
             '<div class="forum-login-row"><input id="forumUser" placeholder="账号" autocomplete="off" /></div>' +
             '<div class="forum-login-row"><input id="forumPw" type="password" placeholder="密码" autocomplete="off" /></div>' +
             '<div class="forum-login-row"><button id="forumPwGo" type="button">登录</button>' +
               '<div class="forum-known-msg muted" id="forumPwMsg"></div></div>' +
-            '<div class="forum-login-hint muted">' + k.hint + '</div>' +
           '</div>'
         : '<div class="forum-known-note muted">已解锁 · 帖子可阅</div>');
     const threads = (D.FORUM.threads || []).filter((t) => S.shenUnlocked || t.authorWechat !== "tfc_jiacheng");
@@ -912,7 +909,7 @@
             S.forumUnlocked = true; store.save({ forumUnlocked: true });
             renderForum();
           } else {
-            msg.className = "forum-known-msg err"; msg.textContent = "不对。密码在生日里。";
+            msg.className = "forum-known-msg err"; msg.textContent = "不对。";
             horror(2);
           }
         };

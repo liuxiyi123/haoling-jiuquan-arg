@@ -561,7 +561,6 @@ body.fx-signal #app{animation:signalWobble .5s ease-in-out 2;
   border:1px solid var(--cinnabar-gold);border-radius:14px;padding:18px;
   box-shadow:0 0 26px rgba(201,162,75,.12);
 }
-.forum-login-title{color:var(--cinnabar-gold);font-size:.84rem;letter-spacing:.18em;margin-bottom:12px}
 .forum-login-row{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .forum-login-row input{
   flex:1 1 140px;min-width:120px;background:var(--ink-xuan-3);
@@ -573,7 +572,6 @@ body.fx-signal #app{animation:signalWobble .5s ease-in-out 2;
   background:var(--wechat-green);color:var(--qr-white);border:none;
   border-radius:8px;padding:9px 16px;font-size:.86rem;cursor:pointer;
 }
-.forum-login-hint{margin-top:10px;font-size:.72rem;letter-spacing:.02em;opacity:.7}
 .forum-known-note{font-size:.76rem;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);text-align:center}
 
 /* 移动端：wx 列表与气泡更贴边 */

@@ -35,7 +35,7 @@ window.HLJQ_DATA = (function () {
   /* ---------- 人物（v8：头像全用真拍；王付岩 / 王鉴 留空走 SVG portrait fallback） ---------- */
   const PEOPLE = {
     "刘希夷": {
-      alias: ["朽孽翁", "希夷"], tag: "本门 · 法官", age: 18, img: "",
+      alias: ["朽孽翁", "希夷"], tag: "本门 · 法官", age: 18, img: IMG + "portrait-liuxiyi.jpg",
       wechat: "xuanlei_xiyi",
       birthday: { stemBranch: "戊子", year: 2008, month: 6, day: 7, zodiac: "鼠" },
       line: "十八岁，南阳守玄雷坛传承弟子，北帝酆岳派法官，号朽孽翁。稍胖壮，长发，常捏着冰爆珠烟压惊。",
@@ -51,31 +51,31 @@ window.HLJQ_DATA = (function () {
       line: "刘希夷租住老宅楼下的修车师傅，中年人。话不多，常深夜在坛场门外，出手方式不属任何已知门派。",
     },
     "麻三": {
-      alias: ["路遥", "麻红福"], tag: "同道 · 巴代", age: 20, img: "",
+      alias: ["路遥", "麻红福"], tag: "同道 · 巴代", age: 20, img: IMG + "portrait-luyao.jpg",
       wechat: "badai_ma_luyao",
       birthday: { stemBranch: "丙戌", year: 2006, month: 2, day: 26, zodiac: "狗" },
       line: "二十岁，苗族青年，家传元皇巴代法（法名麻法虎），贵州铜仁松桃梅沼村人，现居福建。瘦，爷爷传下的法脉已逝三年。",
     },
     "孙师": {
-      alias: ["千寻"], tag: "同道 · 灵宝", age: 20, img: "",
+      alias: ["千寻"], tag: "同道 · 灵宝", age: 20, img: IMG + "portrait-qianxun.jpg",
       wechat: "lingbao_qianxun",
       birthday: { stemBranch: "丙戌", year: 2006, month: 6, day: 7, zodiac: "狗" },
       line: "二十岁，网名千寻，刘希夷称其师傅。主灵宝斋醮科仪、度亡炼度。瘦，长发，原大连人，迁居重庆。",
     },
     "贾生": {
-      alias: ["王范家传"], tag: "同道 · 西河铁师", age: 23, img: "",
+      alias: ["王范家传"], tag: "同道 · 西河铁师", age: 23, img: IMG + "portrait-jiasheng.jpg",
       wechat: "wangfjia_uber",
       birthday: { stemBranch: "癸未", year: 2003, month: 6, day: 7, zodiac: "羊" },
       line: "原名王范家传，学西北西河铁师法，主将王灵官。四川人，现于杭州跑滴滴谋生。",
     },
     "迟浩亮": {
-      alias: [], tag: "同道 · 奇门风水", age: 22, img: IMG + "chihaoliang-meizhao.jpg",
+      alias: [], tag: "同道 · 奇门风水", age: 22, img: IMG + "portrait-chihaoliang.jpg",
       wechat: "qimen_chi",
       birthday: { stemBranch: "甲申", year: 2004, month: 6, day: 7, zodiac: "猴" },
       line: "二十二岁，辽宁大连人，在苏州经营奇门风水工作室。只学奇门遁甲与风水堪舆，不学道法科仪。",
     },
     "沈佳诚": {
-      alias: ["桐凤斋"], tag: "同道 · 开面符", age: 18, img: IMG + "wxtongfengzhai.jpg",
+      alias: ["桐凤斋"], tag: "同道 · 开面符", age: 18, img: IMG + "portrait-shen-jiacheng.jpg",
       wechat: "tfc_jiacheng",
       birthday: { stemBranch: "戊子", year: 2008, month: 6, day: 7, zodiac: "鼠" },
       line: "十八岁，网名桐凤斋，浙江嘉兴人。主桐乡开面符＋江南清微，今年刚高考完，准备去杭州中国美院。",
@@ -375,7 +375,6 @@ window.HLJQ_DATA = (function () {
     subtitle: "妙林斋 · 道门杂谈 · 匿名",
     known: {
       password: "060226",
-      hint: "密码见出生年月日（路遥 2006-02-26）。",
     },
     threads: [
       {
