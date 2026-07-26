@@ -123,6 +123,27 @@ body{
 .react{background:linear-gradient(180deg,rgba(178,58,46,.12),var(--ink-xuan));border:1px solid var(--cinnabar);border-radius:10px;padding:16px;margin-top:10px}
 .react h4{color:var(--cinnabar);font-size:.9rem;margin-bottom:8px;letter-spacing:.1em}
 .react-line{font-size:1.05rem;color:var(--can-bai);line-height:2;letter-spacing:.06em;animation:breathe 2.4s ease-in-out infinite}
+
+/* 万年历 · 年干支查询 */
+.cal-card .cal-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.cal-card .cal-row input{
+  flex:1;min-width:140px;background:var(--ink-xuan-3);border:1px solid var(--iron);
+  color:var(--txt);border-radius:8px;padding:9px 12px;font-size:.95rem;
+}
+.cal-card .cal-row input:focus{outline:none;border-color:var(--cinnabar-gold)}
+.cal-card .cal-row button{
+  background:var(--cinnabar-gold);border:none;color:var(--ink-xuan);
+  border-radius:8px;padding:9px 18px;cursor:pointer;font-size:.9rem;font-weight:600;
+}
+.cal-out{margin-top:12px;min-height:24px}
+.cal-result{font-size:1.05rem;color:var(--txt);letter-spacing:.04em}
+.cal-result b{color:var(--cinnabar-gold)}
+.cal-sb{
+  color:var(--can-bai);font-weight:700;letter-spacing:.1em;
+  font-family:ui-monospace,monospace;
+  text-shadow:0 0 8px rgba(201,162,75,.4);
+}
+.cal-zod{color:var(--cinnabar-gold)}
 @keyframes breathe{0%,100%{opacity:.55}50%{opacity:1}}
 
 /* 保险箱 / 密码 */

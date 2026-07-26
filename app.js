@@ -792,7 +792,10 @@
     const tag = p.deceased ? `<span class="tag death">遗照 · 已故</span>` : `<span class="tag">${p.tag}</span>`;
     const alias = (p.alias && p.alias.length) ? `<p class="muted" style="font-size:.78rem;margin-top:6px">别名：${p.alias.join("、")}</p>` : "";
     const bio = (p.line) ? `<p class="p-bio">${p.line}</p>` : "";
-    const age = (p.age != null) ? `<p class="muted" style="font-size:.74rem;margin-top:4px">约 ${p.age} 岁</p>` : "";
+    // 终章前（沈某投稿未读）：只标出路遥的年龄；终章后（shenRead=true）：全部年龄可见
+    const isLuyao = (name === "麻三") || (p.alias && p.alias.indexOf("路遥") >= 0);
+    const showAge = (p.age != null) && (S.shenRead || isLuyao);
+    const age = showAge ? `<p class="muted" style="font-size:.74rem;margin-top:4px">约 ${p.age} 岁</p>` : "";
     const bleed = '<div class="blood"></div>';
     return `<div class="person">
       <div class="portrait ${p.deceased ? "death" : ""} bleading">
@@ -831,6 +834,13 @@
           if (isFoe) horror(3);
           maybeShowWangjianProtect(personKey);
           maybeTriggerHorror(personKey);
+          return;
+        }
+        // 万年历 · 年干支查询工具
+        if (["万年历","干支","年干支","六十甲子","属相","生肖","天干","地支"].some((k) => kw.includes(k) || k.includes(kw))) {
+          res.innerHTML = calendarHTML();
+          bindCalendar();
+          log("检索：万年历");
           return;
         }
         if (D.REACTIVE_KEYS.some((k) => kw.includes(k) || k.includes(kw))) {
@@ -887,6 +897,40 @@
         <tr style="color:var(--txt-dim)"><td>部位</td><td>人身造化</td><td>卦象 → 数</td></tr>
         ${bodyRows}
       </table></div>`;
+  }
+  /* 万年历 · 六十甲子年干支查询（终章辅助工具） */
+  const GAN_LIST = "甲乙丙丁戊己庚辛壬癸";
+  const ZHI_LIST = "子丑寅卯辰巳午未申酉戌亥";
+  const ZOD_LIST = ["鼠","牛","虎","兔","龙","蛇","马","羊","猴","鸡","狗","猪"];
+  function ganzhiOfYear(y) {
+    const g = ((y - 4) % 10 + 10) % 10;
+    const z = ((y - 4) % 12 + 12) % 12;
+    return { stem: GAN_LIST[g], branch: ZHI_LIST[z], stemBranch: GAN_LIST[g] + ZHI_LIST[z], zodiac: ZOD_LIST[z] };
+  }
+  function calendarHTML() {
+    return `<div class="result cal-card">
+      <h4>万年历 · 六十甲子年干支<span class="tag">工具</span></h4>
+      <p class="muted" style="font-size:.82rem">输入公元年份，查其年干支与属相。六十甲子周而复始。</p>
+      <div class="cal-row">
+        <input id="calYear" type="number" placeholder="如 2008" inputmode="numeric" />
+        <button id="calGo" type="button">查询</button>
+      </div>
+      <div id="calOut" class="cal-out"></div>
+      <p class="muted" style="font-size:.74rem;margin-top:8px">提示：生辰年干支即出生年份的干支。</p>
+    </div>`;
+  }
+  function bindCalendar() {
+    const inp = $("#calYear"), btn = $("#calGo"), out = $("#calOut");
+    if (!inp || !btn || !out) return;
+    function calc() {
+      const y = parseInt(inp.value, 10);
+      if (!y || y < 1) { out.innerHTML = '<p class="muted">请输入有效年份。</p>'; return; }
+      const r = ganzhiOfYear(y);
+      out.innerHTML = '<p class="cal-result"><b>' + y + '</b> 年 · <span class="cal-sb">' + r.stemBranch + '</span> 年 · 属 <span class="cal-zod">' + r.zodiac + '</span></p>';
+      if (S.audio) { ensureAudio(); sting(1); }
+    }
+    btn.addEventListener("click", calc);
+    inp.addEventListener("keydown", (e) => { if (e.key === "Enter") calc(); });
   }
 
   /* =====================================================================
