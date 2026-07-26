@@ -792,10 +792,13 @@
     const tag = p.deceased ? `<span class="tag death">遗照 · 已故</span>` : `<span class="tag">${p.tag}</span>`;
     const alias = (p.alias && p.alias.length) ? `<p class="muted" style="font-size:.78rem;margin-top:6px">别名：${p.alias.join("、")}</p>` : "";
     const bio = (p.line) ? `<p class="p-bio">${p.line}</p>` : "";
-    // 终章前（沈某投稿未读）：只标出路遥的年龄；终章后（shenRead=true）：全部年龄可见
-    const isLuyao = (name === "麻三") || (p.alias && p.alias.indexOf("路遥") >= 0);
-    const showAge = (p.age != null) && (S.shenRead || isLuyao);
-    const age = showAge ? `<p class="muted" style="font-size:.74rem;margin-top:4px">约 ${p.age} 岁</p>` : "";
+    // 终章前：年龄以乱码掩盖；终章后（shenRead=true）：显示真实年龄
+    const showAge = (p.age != null) && S.shenRead;
+    const age = (p.age != null)
+      ? (S.shenRead
+          ? `<p class="muted" style="font-size:.74rem;margin-top:4px">约 ${p.age} 岁</p>`
+          : `<p class="muted" style="font-size:.74rem;margin-top:4px">约 <span class="age-garbled">██</span> 岁</p>`)
+      : "";
     const bleed = '<div class="blood"></div>';
     return `<div class="person">
       <div class="portrait ${p.deceased ? "death" : ""} bleading">
@@ -851,12 +854,14 @@
         }
         const out = [];
         for (const k in D.LORE) {
-          if (k.includes(kw) || kw.includes(k))
-            out.push(`<div class="result"><h4>${k}<span class="tag">世界设定</span></h4><p>${D.LORE[k]}</p></div>`);
+          const txt = D.LORE[k];
+          if (k.includes(kw) || kw.includes(k) || (typeof txt === "string" && txt.includes(kw)))
+            out.push(`<div class="result"><h4>${k}<span class="tag">世界设定</span></h4><p>${txt}</p></div>`);
         }
         if (D.DAOZANG) for (const k in D.DAOZANG) {
-          if (k.includes(kw) || kw.includes(k))
-            out.push(`<div class="result"><h4>${k}<span class="tag">道藏</span></h4><p>${D.DAOZANG[k]}</p></div>`);
+          const txt = D.DAOZANG[k];
+          if (k.includes(kw) || kw.includes(k) || (typeof txt === "string" && txt.includes(kw)))
+            out.push(`<div class="result"><h4>${k}<span class="tag">道藏</span></h4><p>${txt}</p></div>`);
         }
         if ("九宫洛书八卦卦象".includes(kw) || kw === "九宫" || kw === "洛书") out.push(luoshuHTML());
         if ("人身造化铁围山六洞后门".includes(kw) || kw === "人身造化") out.push(bodyMapHTML());
@@ -931,6 +936,23 @@
     }
     btn.addEventListener("click", calc);
     inp.addEventListener("keydown", (e) => { if (e.key === "Enter") calc(); });
+  }
+  function openCalendarModal() {
+    if (document.getElementById("cal-modal")) return;
+    const m = document.createElement("div");
+    m.id = "cal-modal";
+    m.className = "cal-modal";
+    m.innerHTML =
+      '<div class="cal-modal-card">' +
+        '<button class="cal-close" type="button">×</button>' +
+        '<div class="cal-modal-body">' + calendarHTML() + '</div>' +
+      '</div>';
+    document.body.appendChild(m);
+    bindCalendar();
+    m.querySelector(".cal-close").addEventListener("click", () => m.remove());
+    m.addEventListener("click", (e) => { if (e.target === m) m.remove(); });
+    if (S.audio) { ensureAudio(); sting(1); }
+    log("打开万年历");
   }
 
   /* =====================================================================
@@ -1456,6 +1478,7 @@
     { id: "forum", ico: "💭", nm: "论坛", gate: "", href: "forum.html" },
     { id: "news", ico: "📰", nm: "新闻", gate: "", href: "news.html" },
     { id: "gallery", ico: "📜", nm: "图册", gate: "", href: "gallery.html" },
+    { id: "calendar", ico: "📅", nm: "万年历", gate: "", href: "#cal" },
   ];
   // v9(i.2): 浏览器自动播放策略下，首个用户手势即解锁 AudioContext 并拉起 ambient，无需手动点声音键
   function armAudioAutoStart() {
@@ -1483,6 +1506,7 @@
     grid.querySelectorAll(".app").forEach((el) => {
       el.addEventListener("click", (e) => {
         const a = APPS.find((x) => x.id === el.dataset.id);
+        if (a.id === "calendar") { e.preventDefault(); openCalendarModal(); return; }
         const g = a.gate;
         const ok = g === "" || (g === "qa" && S.qa) || (g === "qb" && S.qb) || (g === "qc" && S.qc);
         if (!ok) { e.preventDefault(); log("「" + a.nm + "」尚不可入。"); return; }
