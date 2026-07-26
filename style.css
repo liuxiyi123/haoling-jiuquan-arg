@@ -619,3 +619,338 @@ body.fx-signal #app{animation:signalWobble .5s ease-in-out 2;
 .gal-body{padding:16px 16px 20px}
 .gal-title{color:var(--cinnabar-gold);font-size:1.02rem;letter-spacing:.06em;margin-bottom:8px}
 .gal-text{font-size:.88rem;color:var(--txt);line-height:1.9}
+
+/* =====================================================================
+ *  v9(i) · 解锁按钮（终局头条 modal 内）
+ * ===================================================================== */
+.bk-actions .unlock-btn{
+  width:100%;margin-bottom:10px;
+  background:linear-gradient(180deg,var(--cinnabar),var(--cinnabar-gold));
+  color:var(--qr-white);border:none;border-radius:10px;
+  padding:12px 14px;font-size:.95rem;font-weight:600;letter-spacing:.12em;
+  cursor:pointer;
+  box-shadow:0 0 24px rgba(178,58,46,.45);
+  animation:unlock-pulse 2.4s ease-in-out infinite;
+}
+.bk-actions .unlock-btn:hover{filter:brightness(1.15)}
+@keyframes unlock-pulse{
+  0%,100%{box-shadow:0 0 16px rgba(178,58,46,.35)}
+  50%{box-shadow:0 0 32px rgba(178,58,46,.7),0 0 56px rgba(201,162,75,.25)}
+}
+
+/* =====================================================================
+ *  v9(i) · 九宫图解锁 modal
+ * ===================================================================== */
+.nine-modal{
+  position:fixed;inset:0;z-index:120;
+  background:rgba(0,0,0,.78);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;
+  padding:14px;overflow:auto;
+}
+.nine-card{
+  width:100%;max-width:780px;
+  background:linear-gradient(180deg,var(--ink-xuan-2),var(--ink-xuan));
+  border:1px solid var(--cinnabar-gold);border-radius:16px;
+  padding:18px;max-height:94vh;overflow:auto;
+  box-shadow:0 0 40px rgba(178,58,46,.35);
+}
+.nine-head{position:relative;margin-bottom:14px}
+.nine-title{color:var(--cinnabar-gold);font-size:1.1rem;letter-spacing:.18em;margin-bottom:6px}
+.nine-intro{color:var(--txt-dim);font-size:.84rem;line-height:1.7}
+.nine-close{
+  position:absolute;top:-6px;right:-2px;
+  width:36px;height:36px;border:none;background:transparent;
+  color:var(--txt-dim);font-size:1.6rem;cursor:pointer;line-height:1;
+}
+.nine-close:hover{color:var(--can-bai)}
+.nine-body{
+  display:grid;grid-template-columns:1fr 1fr;gap:18px;
+}
+@media (max-width:720px){.nine-body{grid-template-columns:1fr}}
+.nine-palace{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:6px;
+  aspect-ratio:1;max-width:340px;margin:0 auto;
+}
+.palace-cell{
+  position:relative;
+  background:var(--ink-xuan-3);
+  border:1px solid var(--iron);border-radius:10px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:6px;text-align:center;
+  min-height:80px;
+  transition:border-color .2s,background .2s;
+}
+.palace-cell.center-cell{
+  background:var(--ink-xuan-2);
+  border-style:dashed;opacity:.7;
+}
+.palace-cell .gua{
+  font-size:1.1rem;color:var(--cinnabar-gold);font-weight:600;
+  letter-spacing:.06em;
+}
+.palace-cell .zhi{
+  font-size:.78rem;color:var(--txt-dim);margin-top:2px;letter-spacing:.04em;
+}
+.palace-cell .slot{
+  margin-top:6px;min-height:24px;width:100%;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:6px;
+}
+.palace-cell .slot.filled{background:rgba(201,162,75,.18)}
+.palace-cell .slot.wrong{background:rgba(178,58,46,.35);animation:shake-x .3s ease}
+.palace-cell.drag-over{border-color:var(--cinnabar-gold);background:rgba(201,162,75,.12)}
+.placed-name{
+  font-size:1.1rem;color:var(--can-bai);font-weight:600;
+  letter-spacing:.04em;
+}
+.nine-side{display:flex;flex-direction:column;gap:14px}
+.pool{
+  display:flex;flex-wrap:wrap;gap:6px;
+  padding:10px;background:var(--ink-xuan-3);border-radius:10px;
+  border:1px dashed var(--line);
+}
+.general-chip{
+  background:var(--ink-xuan-2);border:1px solid var(--iron);
+  border-radius:8px;padding:6px 10px;cursor:grab;
+  user-select:none;
+  transition:all .2s;
+}
+.general-chip:hover{border-color:var(--cinnabar-gold);background:rgba(201,162,75,.08)}
+.general-chip.selected{
+  border-color:var(--cinnabar);background:rgba(178,58,46,.25);
+  box-shadow:0 0 12px rgba(178,58,46,.5);
+}
+.general-chip.placed{
+  opacity:.35;pointer-events:auto;
+  border-style:dashed;
+}
+.general-chip.dragging{opacity:.4}
+.general-chip .gname{color:var(--cinnabar-gold);font-size:.86rem;font-weight:600}
+.general-chip .gdesc{color:var(--txt-dim);font-size:.7rem;margin-top:1px}
+.summon-panel{
+  background:var(--ink-xuan-3);border:1px solid var(--iron);
+  border-radius:10px;padding:12px;
+}
+.summon-title{color:var(--cinnabar-gold);font-size:.84rem;letter-spacing:.14em;margin-bottom:8px}
+.summon-row{
+  display:grid;grid-template-columns:32px 50px 1fr;
+  font-size:.78rem;color:var(--txt-dim);
+  padding:3px 0;border-bottom:1px dashed rgba(201,162,75,.1);
+}
+.summon-row:last-child{border-bottom:none}
+.summon-row .sgua{color:var(--cinnabar-gold)}
+.summon-row .szhi{color:var(--can-bai);font-family:ui-monospace,monospace}
+.summon-row .sgen{color:var(--txt)}
+.nine-foot{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);
+  gap:10px;flex-wrap:wrap;
+}
+.nine-msg{color:var(--txt-dim);font-size:.84rem;flex:1;min-width:0}
+.nine-msg.err{color:var(--can-bai)}
+.nine-reset{
+  background:var(--iron);color:var(--txt);
+  border:1px solid var(--line);border-radius:8px;
+  padding:7px 14px;font-size:.82rem;cursor:pointer;
+}
+.nine-reset:hover{background:var(--ink-xuan-3);border-color:var(--cinnabar-gold)}
+.nine-modal.success .nine-card{animation:nine-flash 1s ease}
+@keyframes nine-flash{
+  0%{box-shadow:0 0 40px rgba(178,58,46,.35)}
+  50%{box-shadow:0 0 80px rgba(201,162,75,.85)}
+  100%{box-shadow:0 0 40px rgba(178,58,46,.35)}
+}
+@keyframes shake-x{
+  0%,100%{transform:translateX(0)}
+  20%{transform:translateX(-6px)}
+  40%{transform:translateX(6px)}
+  60%{transform:translateX(-4px)}
+  80%{transform:translateX(4px)}
+}
+
+/* =====================================================================
+ *  v9(i) · 恐怖特效序列
+ * ===================================================================== */
+@keyframes fx-shake-violent-kf{
+  0%   {transform:translate(0,0) rotate(0)}
+  10%  {transform:translate(-12px,8px) rotate(-2deg)}
+  20%  {transform:translate(14px,-10px) rotate(3deg)}
+  30%  {transform:translate(-16px,12px) rotate(-3deg)}
+  40%  {transform:translate(10px,-14px) rotate(2deg)}
+  50%  {transform:translate(-8px,16px) rotate(-1deg)}
+  60%  {transform:translate(16px,-6px) rotate(3deg)}
+  70%  {transform:translate(-14px,4px) rotate(-2deg)}
+  80%  {transform:translate(8px,-12px) rotate(2deg)}
+  90%  {transform:translate(-6px,10px) rotate(-1deg)}
+  100% {transform:translate(0,0) rotate(0)}
+}
+.fx-shake-violent{animation:fx-shake-violent-kf 1.2s ease}
+
+/* 眼睛流血 + 诡异笑 */
+.fx-bleed-eyes{position:relative;filter:contrast(1.4) saturate(1.6)}
+.fx-bleed-eyes::before,.fx-bleed-eyes::after{
+  content:"";position:absolute;top:32%;width:8px;height:0;
+  background:linear-gradient(180deg,rgba(178,30,30,.95),rgba(178,30,30,.05));
+  pointer-events:none;
+  animation:bleed-down 1.6s ease forwards;
+}
+.fx-bleed-eyes::before{left:38%;box-shadow:0 0 12px rgba(178,30,30,.6)}
+.fx-bleed-eyes::after{right:38%;box-shadow:0 0 12px rgba(178,30,30,.6)}
+@keyframes bleed-down{
+  0%   {height:0;opacity:0}
+  20%  {height:14px;opacity:1}
+  100% {height:60px;opacity:.4}
+}
+.fx-uncanny-smile{filter:contrast(1.3) hue-rotate(-12deg)}
+.fx-uncanny-smile::after{
+  content:"";position:absolute;bottom:18%;left:32%;width:36%;height:14px;
+  border-bottom:3px solid rgba(178,30,30,.85);
+  border-radius:0 0 50% 50%/0 0 100% 100%;
+  pointer-events:none;
+  box-shadow:0 0 8px rgba(178,30,30,.5);
+}
+
+/* 红色"都得死"铺满 */
+.fx-red-flood{position:relative}
+.fx-red-flood::before{
+  content:"都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死 都得死";
+  position:fixed;inset:0;z-index:140;pointer-events:none;
+  display:flex;flex-wrap:wrap;align-content:space-around;justify-content:space-around;
+  padding:30px;gap:18px;
+  font-size:2.6rem;color:rgba(178,30,30,.9);font-weight:900;
+  letter-spacing:.1em;
+  text-shadow:0 0 18px rgba(178,30,30,.95),0 0 6px #000;
+  animation:fx-flood-fade 2.2s ease forwards;
+  word-break:break-all;overflow:hidden;
+}
+@keyframes fx-flood-fade{
+  0%   {opacity:0;transform:scale(.96)}
+  20%  {opacity:1;transform:scale(1.04)}
+  100% {opacity:.85;transform:scale(1)}
+}
+@media (max-width:720px){
+  .fx-red-flood::before{font-size:1.5rem;gap:10px;padding:14px}
+}
+
+/* 系统崩坏 modal */
+.fx-system-corrupt{
+  position:fixed;inset:0;z-index:150;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(60,0,0,.6);backdrop-filter:blur(8px);
+  pointer-events:none;
+  animation:sys-flicker .8s ease;
+}
+.sys-corrupt-card{
+  background:#0a0202;border:2px solid var(--can-bai);
+  border-radius:14px;padding:28px 36px;text-align:center;
+  box-shadow:0 0 60px rgba(178,30,30,.9),inset 0 0 30px rgba(178,30,30,.4);
+}
+.sys-corrupt-title{color:var(--can-bai);font-size:1.4rem;font-weight:700;letter-spacing:.18em;margin-bottom:12px}
+.sys-corrupt-text{color:#f5dada;font-size:1rem;line-height:2;font-family:ui-monospace,monospace}
+@keyframes sys-flicker{
+  0%,100%{opacity:1}
+  20%{opacity:.4}
+  40%{opacity:1}
+  60%{opacity:.6}
+  80%{opacity:1}
+}
+
+/* =====================================================================
+ *  v9(i) · 王鉴问答 modal
+ * ===================================================================== */
+.wangjian-question{
+  position:fixed;inset:0;z-index:160;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.85);backdrop-filter:blur(10px);
+  padding:18px;
+}
+.wj-question-card{
+  width:100%;max-width:380px;
+  background:linear-gradient(180deg,var(--ink-xuan-2),var(--ink-xuan));
+  border:1px solid var(--cinnabar-gold);border-radius:16px;
+  padding:24px;text-align:center;
+  box-shadow:0 0 36px rgba(178,58,46,.4);
+}
+.wj-question-from{color:var(--cinnabar-gold);font-size:.84rem;letter-spacing:.18em;margin-bottom:10px}
+.wj-question-text{color:var(--txt);font-size:1.15rem;margin-bottom:18px;letter-spacing:.06em}
+.wj-question-card input{
+  width:100%;background:var(--ink-xuan-3);border:1px solid var(--iron);
+  border-radius:8px;padding:10px 12px;color:var(--txt);
+  font-size:.94rem;outline:none;
+}
+.wj-question-card input:focus{border-color:var(--can-bai)}
+.wj-question-msg{font-size:.78rem;margin-top:8px;min-height:18px}
+.wj-question-msg.err{color:var(--can-bai)}
+.wj-question-msg.ok{color:#7fd49a}
+.wj-question-card.shake-err{animation:shake-x .4s ease}
+.wj-question-card button{
+  margin-top:14px;width:100%;
+  background:var(--wechat-green);color:var(--qr-white);
+  border:none;border-radius:8px;padding:10px;font-size:.92rem;
+  cursor:pointer;font-weight:600;
+}
+.wj-question-card button:hover{filter:brightness(1.1)}
+
+/* 王鉴保护提示（绿色/淡青 modal） */
+.wj-protect-modal{
+  position:fixed;bottom:18px;left:18px;right:18px;z-index:170;
+  display:flex;justify-content:center;
+  pointer-events:auto;
+}
+.wj-protect-card{
+  width:100%;max-width:380px;
+  background:linear-gradient(180deg,#1c3d4a,#0e2228);
+  border:1px solid #7fd49a;border-radius:14px;
+  padding:16px;color:#cfeadc;
+  box-shadow:0 0 30px rgba(127,212,154,.35);
+  cursor:pointer;
+}
+.wj-protect-head{display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:8px;letter-spacing:.08em}
+.wj-protect-from{color:#7fd49a;font-weight:600}
+.wj-protect-meta{color:rgba(207,234,220,.6)}
+.wj-protect-text{font-size:.88rem;line-height:1.7;white-space:pre-wrap}
+.wj-protect-action{margin-top:10px;color:#7fd49a;font-size:.78rem;text-align:right}
+
+/* =====================================================================
+ *  v9(i) · 黑纸二次确认 / 假锁机
+ * ===================================================================== */
+.bw-confirm{
+  position:fixed;inset:0;z-index:130;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.75);backdrop-filter:blur(6px);
+  padding:18px;
+}
+.bw-confirm-card{
+  width:100%;max-width:360px;
+  background:linear-gradient(180deg,var(--ink-xuan-2),var(--ink-xuan));
+  border:1px solid var(--cinnabar);border-radius:16px;
+  padding:22px;text-align:center;
+  box-shadow:0 0 30px rgba(178,58,46,.45);
+}
+.bw-confirm-text{color:var(--txt);font-size:.96rem;line-height:1.9;margin-bottom:18px;letter-spacing:.04em}
+.bw-confirm-actions{display:flex;gap:10px;justify-content:center}
+.bw-confirm-actions button{
+  background:var(--wechat-green);color:var(--qr-white);
+  border:none;border-radius:8px;padding:9px 22px;font-size:.88rem;
+  cursor:pointer;font-weight:600;
+}
+.bw-confirm-actions button.ghost{
+  background:transparent;color:var(--txt-dim);border:1px solid var(--line);
+}
+.bw-confirm-actions button:hover{filter:brightness(1.1)}
+
+.fake-lock{
+  position:fixed;inset:0;z-index:180;
+  display:flex;align-items:center;justify-content:center;
+  background:#000;
+  animation:fake-lock-flicker .15s ease infinite alternate;
+}
+.fake-lock-text{
+  color:var(--can-bai);font-size:1.6rem;font-weight:700;
+  letter-spacing:.3em;
+  text-shadow:0 0 24px rgba(178,30,30,.95),0 0 8px #000;
+}
+@keyframes fake-lock-flicker{
+  0%   {background:#000}
+  100% {background:#1a0202}
+}

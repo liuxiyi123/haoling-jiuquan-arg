@@ -66,7 +66,7 @@ window.HLJQ_DATA = (function () {
       alias: ["王范家传"], tag: "同道 · 西河铁师", age: 23, img: IMG + "portrait-jiasheng.jpg",
       wechat: "wangfjia_uber",
       birthday: { stemBranch: "癸未", year: 2003, month: 6, day: 7, zodiac: "羊" },
-      line: "原名王范家传，学西北西河铁师法，主将王灵官。四川人，现于杭州跑滴滴谋生。",
+      line: "原名王范家传，学西北西河铁师法，主将王灵官。四川人，现于杭州跑滴滴某生。",
     },
     "迟浩亮": {
       alias: [], tag: "同道 · 奇门风水", age: 22, img: IMG + "portrait-chihaoliang.jpg",
@@ -228,7 +228,7 @@ window.HLJQ_DATA = (function () {
       body: "叛师法魂被锁，我行酆都拷邪律令、变神为祖师宣读黑律『邪师倚法抗拒正法者——分形』。他抵抗——曾为酆都法官，熟知黑律每一条文并反用。\n转折在帝庄二字。北帝赐酆都主将魏天君金盘秘字，不是条文，是北帝直接的意志——『鬼邪见之，神愁鬼像无不降伏』。法律可被熟知反用，北帝的直接意志不可反。\n我存思帝庄二字从金盘升起，祖师传此二字，我成了北帝意志的传达者。叛师法魂被降伏，黑律宣判分形，碎入六洞，永不得出。最后一洞封锁解除——内里封存着的，是坛脉真火。" },
     { n: 18, unlock: "qc", date: "4月3日 · 周五 · 07:00",
       body: "最后一洞封锁解除——内里封存着守玄雷坛的「坛脉真火」。度师临终说『守住那一线酆都真火不灭』，我原以为真火是比喻，此刻才知它真实存在——是酆都法脉在人间的锚点、传承的根基。\n度师生前封存，是为护它不被夺。真火灭，则法脉断、酆都鬼城在人间失了锚，邪法便无人可治。\n我取九泉号令——号令温热如握真火，三年养令，从未有此感。号令非器，乃真火之载体；守住号令，即守住真火。千寻远程炼度完成，被害的散魂得以度亡超拔。" },
-    { n: 19, unlock: "qc", date: "4月6日 · 周一 · 15:20",
+    { n: 19, unlock: "qc", date: "4月16日 · 周一 · 15:20",
       body: "战后善后。千寻临行前与我长谈度师遗物上墨线划过的那一处：王付岩曾与一位西河铁师老法师往来，老法师欲建「酆都法＋西河铁师法」的同道互助，王付岩没应——『酆都法是杀伐之道，杀伐不可轻与人合。合了，杀伐的力量就分散了。』\n但他留了话：『若一日我走了，希夷独守不住——那就让他去找同道。酆都法不可与人合，但酆都法官可以与人合。法不合，人合。』\n我到此刻才明白：划掉那位置，不是拒同道，是拒法脉混杂，却留了「人合」的可能。贾生说：『你度师划掉那位置，是因他一个人扛得住。你扛不住时，同道自然就来了。法在书上，人在路上。』" },
     { n: 20, unlock: "qa", date: "4月11日 · 周六 · 23:40",
       body: "我把范围扩大到南阳周边。翻本地论坛旧帖，撞上三个月前驻马店的一则短讯：某高校大三学生，从教学楼坠楼，校方说调查中。\n世俗新闻只报可见之事。我顺着关键词又挖到一个同学帖——人是跪着落地的，双手贴地、额头朝下、膝盖弯着，像在拜。他说现场眉心有一块淡黑印记，洗不掉。\n这和南阳那户一样。不是个案。邪师在周边多城都下了手，专挑入过群的年轻人。我把驻马店这条告诉了路遥，他沉默很久：『这种程度，不像是教训，像收割。』" },
@@ -418,10 +418,10 @@ window.HLJQ_DATA = (function () {
         title: "（仅一帖）嘉兴消息",
         author: "桐凤斋",
         authorWechat: "tfc_jiacheng",
-        time: "4月6日 15:20",
+        time: "4月16日 15:20",
         replies: 1,
         posts: [
-          { wechat: "tfc_jiacheng",   who: "桐凤斋",   time: "4月6日 15:20",
+          { wechat: "tfc_jiacheng",   who: "桐凤斋",   time: "4月16日 15:20",
             text: "各位前辈。我跟刘哥学过开面符。论坛上有些事我不敢多说。我只能说——刘哥那部手机里，会有一点线索。剩下的路，你们自己走。我还活着。" },
         ],
       },
@@ -437,7 +437,7 @@ window.HLJQ_DATA = (function () {
       "河南省南阳市今日通报：五名男子先后于不同楼宇坠楼身亡，年龄介于十八至二十三岁之间。" +
       "现场影像显示，五人落地姿态高度一致——双手贴地、膝盖弯曲、额头朝下，呈跪拜之状；法医记录其眉心均有一处洗不掉的黑色印记。\n" +
       "警方已介入调查，暂未定性。网传五人互为『同道』，生前活跃于多个修真交流群组。其中一人手机内，存有大篇幅手记与群聊残档。",
-    names: ["刘某（南阳）", "麻谋", "孙谋", "王某", "迟某"],
+    names: ["刘某（南阳）", "麻某", "孙某", "王某", "迟某"],
     tip: "浙江嘉兴一位沈某向本报投稿，称『有点小道消息』，未肯详述。",
   };
 
@@ -448,8 +448,8 @@ window.HLJQ_DATA = (function () {
     hint: "线索在『新闻 · 沈某投稿』与论坛里。生辰 = 真名 + 年干支。",
     fields: [
       { key: "刘某", age: 18 },
-      { key: "麻谋", age: 20 },
-      { key: "孙谋", age: 20 },
+      { key: "麻某", age: 20 },
+      { key: "孙某", age: 20 },
       { key: "王某", age: 23 },
       { key: "迟某", age: 22 },
     ],
@@ -468,5 +468,61 @@ window.HLJQ_DATA = (function () {
     foretellNote: 22,   // 读完此笔记即弹头条
   };
 
-  return { META, LUOSHU, PEOPLE, LORE, GALLERY, DAOZANG, REACTIVE_KEYS, REACTIVE, WANGJIAN, QUESTS, DAILY_NOTES, GROUP_CHATS, PRIVATE_MSGS, MOMENTS, NEWS, FORUM, HEADLINE, TRUTH, DEATH };
+  /* ---------- 九宫图解锁（v9(i) 八卦与八将对应） ---------- */
+  /* 触发：终局头条出现后（bkShown=true），解锁按钮出现。
+   * 玩法：3×3 九宫格（先天八卦排布），8 个将名拖入对应方位格。
+   * 解锁成功后跳转论坛沈某帖（t3）。 */
+  const NINE_PALACE = {
+    title: "九宫图 · 八将归位",
+    intro: "八将与八卦同位。八将各归其宫，方为法脉完整。",
+    /* 九宫方位排布（先天八卦）：
+     *  艮(东北) | 坎(北) | 乾(西北)
+     *  震(东)   | 中     | 兑(西)
+     *  巽(东南) | 离(南) | 坤(西南) */
+    grid: [
+      [{ gua: "艮", zhi: "丑寅", position: "东北", general: "车" },
+       { gua: "坎", zhi: "子",   position: "北",   general: "王" },
+       { gua: "乾", zhi: "戌亥", position: "西北", general: "劣" }],
+      [{ gua: "震", zhi: "卯",   position: "东",   general: "韦" },
+       { gua: "中", zhi: "",     position: "中",   general: null },
+       { gua: "兑", zhi: "酉",   position: "西",   general: "孟" }],
+      [{ gua: "巽", zhi: "辰巳", position: "东南", general: "夏" },
+       { gua: "离", zhi: "午",   position: "南",   general: "刘" },
+       { gua: "坤", zhi: "未申", position: "西南", general: "桑" }],
+    ],
+    /* 将名池（初始在格外的 8 个可拖拽芯片） */
+    pool: [
+      { id: "韦", name: "韦帅", desc: "东方" },
+      { id: "刘", name: "刘帅", desc: "南方" },
+      { id: "王", name: "王帅", desc: "北方" },
+      { id: "孟", name: "孟帅", desc: "西方" },
+      { id: "车", name: "车帅", desc: "东北方" },
+      { id: "夏", name: "夏帅", desc: "东南方" },
+      { id: "劣", name: "劣帅", desc: "西北方" },
+      { id: "桑", name: "桑帅", desc: "西南方" },
+    ],
+  };
+
+  /* ---------- 召将地支咒（v9(i) 解锁参考） ---------- */
+  const SUMMON_INCANTATION = {
+    title: "召将地支诀",
+    rows: [
+      { gua: "坎", zhi: "子",   general: "王帅掐子诀" },
+      { gua: "艮", zhi: "丑寅", general: "车帅掐丑诀" },
+      { gua: "震", zhi: "卯",   general: "韦帅掐卯诀" },
+      { gua: "巽", zhi: "辰巳", general: "夏帅掐辰诀" },
+      { gua: "离", zhi: "午",   general: "刘帅掐午诀" },
+      { gua: "坤", zhi: "未申", general: "桑帅掐未诀" },
+      { gua: "兑", zhi: "酉",   general: "孟帅掐酉诀" },
+      { gua: "乾", zhi: "戌亥", general: "劣帅掐戌诀" },
+    ],
+  };
+
+  /* ---------- 恐怖触发人物（v9(i) 沈某帖后首次检索触发） ---------- */
+  /* 沈某采访（论坛 t3）出现后，首次检索以下 5 人触发恐怖特效序列。
+   * 答对王鉴问题后受保护（S.spooked=true），后续检索恢复正常。 */
+  const HORROR_PEOPLE = ["刘希夷", "迟浩亮", "孙师", "麻三", "贾生"];
+  const HORROR_ANSWERS = ["王鉴", "内坛八将", "飞天八将", "内坛", "八将", "修车师傅"];
+
+  return { META, LUOSHU, PEOPLE, LORE, GALLERY, DAOZANG, REACTIVE_KEYS, REACTIVE, WANGJIAN, QUESTS, DAILY_NOTES, GROUP_CHATS, PRIVATE_MSGS, MOMENTS, NEWS, FORUM, HEADLINE, TRUTH, DEATH, NINE_PALACE, SUMMON_INCANTATION, HORROR_PEOPLE, HORROR_ANSWERS };
 })();

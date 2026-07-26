@@ -22,7 +22,7 @@
     clear() { try { localStorage.removeItem(KEY); } catch (e) {} },
   };
   let S = Object.assign(
-    { qa: false, qb: false, qc: false, read: [], wj: [], wjUnread: 0, audio: false, fx: true, bled: [], death: false, truth: false, bkShown: false, shenRead: false, forumUnlocked: false, shenUnlocked: false, wjProtectDismissed: [], wxTab: "chats" },
+    { qa: false, qb: false, qc: false, read: [], wj: [], wjUnread: 0, audio: true, fx: true, bled: [], death: false, truth: false, bkShown: false, shenRead: false, forumUnlocked: false, shenUnlocked: false, wjProtectDismissed: [], wxTab: "chats", spooked: false, nineSolved: false },
     store.load()
   );
 
@@ -264,6 +264,7 @@
         '<div class="bk-names"><span>死者（匿名）：</span>' + H.names.map((n) => "<b>" + n + "</b>").join("") + "</div>" +
         '<p class="bk-tip">' + (H.tip || "") + "</p>" +
         '<div class="bk-actions">' +
+          '<button id="bkUnlock" type="button" class="unlock-btn">解锁 · 九宫归将</button>' +
           '<button id="bkShare" type="button">分享这部手机</button>' +
           '<button id="bkClose" type="button" class="ghost">再看一眼</button>' +
         "</div>" +
@@ -281,9 +282,11 @@
       fireWJ("finale");
       const share = document.getElementById("bkShare");
       const close = document.getElementById("bkClose");
+      const unlock = document.getElementById("bkUnlock");
       if (share) share.onclick = () => doShare(
         (D.META && D.META.title) + "\n" + H.title + "\n——一部无人认领的手机里，藏着这件事的另一端。");
       if (close) close.onclick = () => overlay.remove();
+      if (unlock) unlock.onclick = () => { overlay.remove(); openNinePalace(); };
     }
     if (perform) setTimeout(finish, reduceMotion ? 2200 : 5200);
     else finish();
@@ -339,6 +342,317 @@
     ta.remove(); return true;
   }
   function flash(btn, msg) { if (btn) { const old = btn.textContent; btn.textContent = msg; setTimeout(() => (btn.textContent = old), 1400); } else { log(msg); } }
+
+  /* =====================================================================
+   *  v9(i) · 九宫图解锁（八卦与八将对应）
+   * ===================================================================== */
+  let nineSelected = null; // 当前选中的将名 chip id
+  let ninePlaced = {};     // { "0,0": "车", "0,1": "王", ... }
+  function openNinePalace() {
+    if (S.nineSolved) {
+      // 已解开：直接跳论坛沈某帖
+      location.href = "forum.html#thread-t3";
+      return;
+    }
+    if (document.getElementById("nine-modal")) return;
+    const N = D.NINE_PALACE;
+    const cells = [];
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 3; c++) {
+        const cell = N.grid[r][c];
+        const zhi = cell.zhi || "—";
+        const gua = cell.gua || "中";
+        cells.push(
+          '<div class="palace-cell' + (cell.general ? "" : " center-cell") + '" data-r="' + r + '" data-c="' + c + '" data-expected="' + (cell.general || "") + '">' +
+            '<div class="gua">' + gua + '</div>' +
+            '<div class="zhi">' + zhi + '</div>' +
+            '<div class="slot" data-r="' + r + '" data-c="' + c + '"></div>' +
+          '</div>'
+        );
+      }
+    }
+    const pool = N.pool.map((g) =>
+      '<div class="general-chip" draggable="true" data-id="' + g.id + '">' +
+        '<div class="gname">' + g.name + '</div>' +
+        '<div class="gdesc">' + g.desc + '</div>' +
+      '</div>'
+    ).join("");
+    const incant = D.SUMMON_INCANTATION.rows.map((row) =>
+      '<div class="summon-row"><span class="sgua">' + row.gua + '</span><span class="szhi">' + row.zhi + '</span><span class="sgen">' + row.general + '</span></div>'
+    ).join("");
+    const modal = document.createElement("div");
+    modal.id = "nine-modal";
+    modal.className = "nine-modal";
+    modal.innerHTML =
+      '<div class="nine-card">' +
+        '<div class="nine-head">' +
+          '<div class="nine-title">' + N.title + '</div>' +
+          '<div class="nine-intro">' + N.intro + '</div>' +
+          '<button class="nine-close" type="button">×</button>' +
+        '</div>' +
+        '<div class="nine-body">' +
+          '<div class="nine-palace">' + cells.join("") + '</div>' +
+          '<div class="nine-side">' +
+            '<div class="pool">' + pool + '</div>' +
+            '<div class="summon-panel"><div class="summon-title">' + D.SUMMON_INCANTATION.title + '</div>' + incant + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="nine-foot">' +
+          '<div class="nine-msg" id="nineMsg">提示：拖动将名到对应宫位，或先点将名再点宫位。</div>' +
+          '<button class="nine-reset" type="button">重置</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(modal);
+    if (S.audio) { ensureAudio(); sting(2); }
+    wireNinePalace();
+  }
+  function wireNinePalace() {
+    const modal = document.getElementById("nine-modal");
+    if (!modal) return;
+    modal.querySelector(".nine-close").onclick = () => modal.remove();
+    modal.querySelector(".nine-reset").onclick = () => {
+      nineSelected = null; ninePlaced = {};
+      modal.querySelectorAll(".slot").forEach((s) => { s.innerHTML = ""; s.classList.remove("filled", "wrong"); });
+      modal.querySelectorAll(".general-chip").forEach((c) => { c.classList.remove("selected", "placed"); });
+      setNineMsg("已重置。");
+    };
+    // chip 点击（移动端 tap-to-place）
+    modal.querySelectorAll(".general-chip").forEach((chip) => {
+      chip.addEventListener("click", () => {
+        const id = chip.dataset.id;
+        // 已放置的 chip：点击收回
+        if (chip.classList.contains("placed")) {
+          const key = Object.keys(ninePlaced).find((k) => ninePlaced[k] === id);
+          if (key) {
+            delete ninePlaced[key];
+            const [r, c] = key.split(",");
+            const slot = modal.querySelector('.slot[data-r="' + r + '"][data-c="' + c + '"]');
+            if (slot) { slot.innerHTML = ""; slot.classList.remove("filled", "wrong"); }
+          }
+          chip.classList.remove("placed");
+          nineSelected = null;
+          modal.querySelectorAll(".general-chip").forEach((c) => c.classList.remove("selected"));
+          setNineMsg("已收回 " + id + " 帅。");
+          return;
+        }
+        // 选中态切换
+        if (nineSelected === id) { nineSelected = null; chip.classList.remove("selected"); return; }
+        modal.querySelectorAll(".general-chip").forEach((c) => c.classList.remove("selected"));
+        nineSelected = id;
+        chip.classList.add("selected");
+        setNineMsg("已选中 " + id + " 帅。点选目标宫位。");
+      });
+      // dragstart
+      chip.addEventListener("dragstart", (e) => { e.dataTransfer.setData("text/plain", id); chip.classList.add("dragging"); });
+      chip.addEventListener("dragend", () => chip.classList.remove("dragging"));
+    });
+    // cell 点击（移动端放置）
+    modal.querySelectorAll(".palace-cell").forEach((cell) => {
+      cell.addEventListener("click", () => {
+        if (!nineSelected) return;
+        const r = cell.dataset.r, c = cell.dataset.c;
+        placeNine(modal, r, c, nineSelected);
+      });
+      // dragover / drop（桌面）
+      cell.addEventListener("dragover", (e) => { e.preventDefault(); cell.classList.add("drag-over"); });
+      cell.addEventListener("dragleave", () => cell.classList.remove("drag-over"));
+      cell.addEventListener("drop", (e) => {
+        e.preventDefault(); cell.classList.remove("drag-over");
+        const id = e.dataTransfer.getData("text/plain");
+        if (!id) return;
+        const r = cell.dataset.r, c = cell.dataset.c;
+        placeNine(modal, r, c, id);
+      });
+    });
+  }
+  function placeNine(modal, r, c, id) {
+    const cell = modal.querySelector('.palace-cell[data-r="' + r + '"][data-c="' + c + '"]');
+    if (!cell) return;
+    const expected = cell.dataset.expected;
+    // 中央宫不接受
+    if (!expected) {
+      setNineMsg("中央为空，不归将。");
+      return;
+    }
+    // 该格已有将 → 先清掉旧 chip 的 placed 态
+    const slot = cell.querySelector(".slot");
+    if (ninePlaced[r + "," + c]) {
+      const oldId = ninePlaced[r + "," + c];
+      const oldChip = modal.querySelector('.general-chip[data-id="' + oldId + '"]');
+      if (oldChip) oldChip.classList.remove("placed");
+    }
+    // 该将已在别处 → 清除旧格
+    const oldKey = Object.keys(ninePlaced).find((k) => ninePlaced[k] === id);
+    if (oldKey) {
+      delete ninePlaced[oldKey];
+      const [or, oc] = oldKey.split(",");
+      const oldSlot = modal.querySelector('.slot[data-r="' + or + '"][data-c="' + oc + '"]');
+      if (oldSlot) { oldSlot.innerHTML = ""; oldSlot.classList.remove("filled", "wrong"); }
+    }
+    // 放置
+    ninePlaced[r + "," + c] = id;
+    slot.innerHTML = '<div class="placed-name">' + id + '</div>';
+    slot.classList.add("filled");
+    const chip = modal.querySelector('.general-chip[data-id="' + id + '"]');
+    if (chip) { chip.classList.add("placed"); chip.classList.remove("selected"); }
+    nineSelected = null;
+    // 判定：是否正确
+    if (id !== expected) {
+      slot.classList.add("wrong");
+      setNineMsg(id + " 帅不在此宫。再试。", true);
+      if (S.audio) { ensureAudio(); playReal("stingLow"); }
+      return;
+    }
+    slot.classList.remove("wrong");
+    setNineMsg(id + " 帅归位。");
+    if (S.audio) { ensureAudio(); playReal("stingLow"); }
+    // 检查是否全部归位
+    if (Object.keys(ninePlaced).length === 8 && Object.keys(ninePlaced).every((k) => ninePlaced[k] === modal.querySelector('.palace-cell[data-r="' + k.split(",")[0] + '"][data-c="' + k.split(",")[1] + '"]').dataset.expected)) {
+      nineSuccess(modal);
+    }
+  }
+  function setNineMsg(t, err) {
+    const m = document.getElementById("nineMsg");
+    if (!m) return;
+    m.textContent = t;
+    m.className = "nine-msg" + (err ? " err" : "");
+  }
+  function nineSuccess(modal) {
+    setNineMsg("八将归位。法脉完整。");
+    if (S.audio) { ensureAudio(); sting(3); }
+    S.nineSolved = true; S.shenUnlocked = true;
+    store.save({ nineSolved: true, shenUnlocked: true });
+    setTimeout(() => {
+      modal.classList.add("success");
+      setTimeout(() => {
+        modal.remove();
+        location.href = "forum.html#thread-t3";
+      }, 900);
+    }, 700);
+  }
+
+  /* =====================================================================
+   *  v9(i) · 恐怖特效序列（沈某帖后首次检索触发）
+   * ===================================================================== */
+  function maybeTriggerHorror(personKey) {
+    if (!S.shenRead) return;        // 沈某帖还没读
+    if (S.spooked) return;          // 已受保护
+    if (!D.HORROR_PEOPLE || D.HORROR_PEOPLE.indexOf(personKey) < 0) return;
+    S.spooked = true;               // 锁住，避免重复触发
+    store.save({ spooked: true });
+    runHorrorSequence();
+  }
+  function runHorrorSequence() {
+    const body = document.body;
+    // 1. 剧烈摇晃（1.2s）
+    body.classList.add("fx-shake-violent");
+    if (S.audio) { ensureAudio(); playReal("stingHigh"); }
+    setTimeout(() => {
+      // 2-3. 肖像流血 + 诡异笑
+      body.querySelectorAll(".portrait-img, .wx-photo").forEach((img) => {
+        img.classList.add("fx-bleed-eyes", "fx-uncanny-smile");
+      });
+      // 4. 红色"都得死"铺满
+      body.classList.add("fx-red-flood");
+      if (S.audio) { ensureAudio(); playReal("stingMid"); }
+    }, 400);
+    setTimeout(() => {
+      // 5. 系统崩坏 modal
+      showSystemCorruptModal();
+    }, 1800);
+    setTimeout(() => {
+      body.classList.remove("fx-shake-violent", "fx-red-flood");
+      // 6. 王鉴问题 modal
+      showWangjianQuestionModal();
+    }, 3400);
+  }
+  function showSystemCorruptModal() {
+    if (document.getElementById("sys-corrupt-modal")) return;
+    const m = document.createElement("div");
+    m.id = "sys-corrupt-modal";
+    m.className = "fx-system-corrupt";
+    m.innerHTML =
+      '<div class="sys-corrupt-card">' +
+        '<div class="sys-corrupt-title">⚠ 系统崩坏</div>' +
+        '<div class="sys-corrupt-text">身份校验失败。<br/>法脉已污染。<br/>所有同道——</div>' +
+      '</div>';
+    document.body.appendChild(m);
+    if (S.audio) { ensureAudio(); playReal("glass"); }
+  }
+  function clearHorrorEffects() {
+    document.body.classList.remove("fx-shake-violent", "fx-red-flood");
+    document.querySelectorAll(".fx-bleed-eyes, .fx-uncanny-smile").forEach((el) => el.classList.remove("fx-bleed-eyes", "fx-uncanny-smile"));
+    const sc = document.getElementById("sys-corrupt-modal"); if (sc) sc.remove();
+  }
+  function showWangjianQuestionModal() {
+    if (document.getElementById("wj-question-modal")) return;
+    const m = document.createElement("div");
+    m.id = "wj-question-modal";
+    m.className = "wangjian-question";
+    m.innerHTML =
+      '<div class="wj-question-card">' +
+        '<div class="wj-question-from">修车师傅 · 王鉴</div>' +
+        '<div class="wj-question-text">你可知我是谁？</div>' +
+        '<input id="wjAns" placeholder="请回答" autocomplete="off" />' +
+        '<div class="wj-question-msg err" id="wjAnsMsg"></div>' +
+        '<button id="wjAnsGo" type="button">确认</button>' +
+      '</div>';
+    document.body.appendChild(m);
+    if (S.audio) { ensureAudio(); sting(1); }
+    const inp = document.getElementById("wjAns");
+    const go = document.getElementById("wjAnsGo");
+    const msg = document.getElementById("wjAnsMsg");
+    const tryAns = () => {
+      const v = (inp.value || "").replace(/\s+/g, "").toLowerCase();
+      const ok = (D.HORROR_ANSWERS || []).some((a) => a.replace(/\s+/g, "").toLowerCase() === v);
+      if (!v) { msg.textContent = "请回答。"; return; }
+      if (ok) {
+        msg.className = "wj-question-msg ok"; msg.textContent = "你答对了。";
+        clearHorrorEffects();
+        setTimeout(() => {
+          m.remove();
+          showWangjianProtectModal();
+        }, 600);
+      } else {
+        msg.textContent = "不对。";
+        m.classList.add("shake-err");
+        setTimeout(() => m.classList.remove("shake-err"), 400);
+        if (S.audio) { ensureAudio(); playReal("stingMid"); }
+      }
+    };
+    go.onclick = tryAns;
+    inp.addEventListener("keydown", (e) => { if (e.key === "Enter") tryAns(); });
+  }
+  function showFakeLock() {
+    if (document.getElementById("fake-lock")) return;
+    const m = document.createElement("div");
+    m.id = "fake-lock";
+    m.className = "fake-lock";
+    m.innerHTML = '<div class="fake-lock-text">系统已锁定</div>';
+    document.body.appendChild(m);
+    if (S.audio) { ensureAudio(); playReal("stingHigh"); playReal("glass"); }
+    setTimeout(() => m.remove(), 1500);
+  }
+  function showBWConfirm(onConfirm) {
+    if (document.getElementById("bw-confirm-modal")) return;
+    const m = document.createElement("div");
+    m.id = "bw-confirm-modal";
+    m.className = "bw-confirm";
+    m.innerHTML =
+      '<div class="bw-confirm-card">' +
+        '<div class="bw-confirm-text">你确定选择这个吗？<br/>选择失败系统将自动锁机。</div>' +
+        '<div class="bw-confirm-actions">' +
+          '<button id="bwConfirmYes" type="button">确定</button>' +
+          '<button id="bwConfirmNo" type="button" class="ghost">取消</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(m);
+    if (S.audio) { ensureAudio(); sting(1); }
+    const yes = document.getElementById("bwConfirmYes");
+    const no = document.getElementById("bwConfirmNo");
+    yes.onclick = () => { m.remove(); onConfirm(); };
+    no.onclick = () => { m.remove(); showFakeLock(); };
+  }
 
   /* =====================================================================
    *  检索（人物/术语/群聊/反应式）
@@ -400,6 +714,7 @@
           const isFoe = !!(personHit.foe || (personHit.tag && personHit.tag.indexOf("反派") >= 0));
           if (isFoe) horror(3);
           maybeShowWangjianProtect(personKey);
+          maybeTriggerHorror(personKey);
           return;
         }
         if (D.REACTIVE_KEYS.some((k) => kw.includes(k) || k.includes(kw))) {
@@ -500,6 +815,9 @@
    * ===================================================================== */
   function renderBW() {
     if (!S.qa) { showPage("黑纸辨识", `<p class="muted center" style="padding:40px">此处暂无可见之物。</p>`); return; }
+    showBWConfirm(() => renderBWInner());
+  }
+  function renderBWInner() {
     const p = D.QUESTS.qb;
     const html = `
       <p class="center" style="color:var(--txt-dim);margin-bottom:10px">${p.question}</p>
@@ -980,6 +1298,8 @@
     setInterval(() => { const d = new Date(); $("#sbClock").textContent = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); }, 1000);
     $("#sbClock").textContent = "--:--";
     sync();
+    // v9(i): 音效始终打开（默认 audio=true → 启动 drone）
+    if (S.audio) { ensureAudio(); startDrone(); }
     if (S.death) { buildBreaking(false); log("终局已至。"); return; }
     log("数据恢复完成。");
     ensureBoot();
@@ -987,6 +1307,7 @@
   }
   function initPage(page) {
     ensureBoot();
+    if (S.audio) { ensureAudio(); startDrone(); }
     if (S.death) buildBreaking(false);
     const map = {
       search: renderSearch, vault: renderVault, bw: renderBW, qc: renderQC,
