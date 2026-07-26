@@ -661,12 +661,12 @@
     const m = document.createElement("div");
     m.id = "fake-lock";
     m.className = "fake-lock";
-    m.innerHTML = '<div class="fake-lock-text">系统已锁定</div>';
+    m.innerHTML = '<div class="fake-lock-text">系统已锁定</div><div class="fake-lock-sub">2 秒后恢复</div>';
     document.body.appendChild(m);
     if (S.audio) { ensureAudio(); playReal("stingHigh"); playReal("glass"); }
-    setTimeout(() => m.remove(), 1500);
+    setTimeout(() => m.remove(), 2000);
   }
-  function showBWConfirm(onConfirm) {
+  function showBWConfirm(chosenId, correct, onYes, onCancel) {
     if (document.getElementById("bw-confirm-modal")) return;
     const m = document.createElement("div");
     m.id = "bw-confirm-modal";
@@ -683,8 +683,8 @@
     if (S.audio) { ensureAudio(); sting(1); }
     const yes = document.getElementById("bwConfirmYes");
     const no = document.getElementById("bwConfirmNo");
-    yes.onclick = () => { m.remove(); onConfirm(); };
-    no.onclick = () => { m.remove(); showFakeLock(); };
+    yes.onclick = () => { m.remove(); if (onYes) onYes(); };
+    no.onclick = () => { m.remove(); if (onCancel) onCancel(); };
   }
 
   /* =====================================================================
@@ -848,7 +848,7 @@
    * ===================================================================== */
   function renderBW() {
     if (!S.qa) { showPage("黑纸辨识", `<p class="muted center" style="padding:40px">此处暂无可见之物。</p>`); return; }
-    showBWConfirm(() => renderBWInner());
+    renderBWInner();
   }
   function renderBWInner() {
     const p = D.QUESTS.qb;
@@ -863,17 +863,23 @@
       $("#pageBody").querySelectorAll(".card").forEach((c) =>
         c.addEventListener("click", () => {
           const id = c.dataset.opt;
-          const correct = p.options.find((o) => o.id === id).correct;
+          const opt = p.options.find((o) => o.id === id);
           const msg = $("#bwmsg");
-          if (correct) {
-            c.classList.add("sel");
-            msg.className = "msg ok center"; msg.textContent = "正法。黑纸朱书——赤镇黑，以酒调砂。";
-            solveQuest("qb");
-            setTimeout(() => { location.href = "index.html"; }, 1000);
-          } else {
-            msg.className = "msg err center"; msg.textContent = "这是反法黑纸白书——骨粉养煞、从左往右画。";
-            horror(2);
-          }
+          // 进入黑纸辨识后可自由查看；只有点 朱书/骨书 做选择时才二次确认（防误选）
+          showBWConfirm(id, opt.correct, () => {
+            if (opt.correct) {
+              c.classList.add("sel");
+              msg.className = "msg ok center"; msg.textContent = "正法。黑纸朱书——赤镇黑，以酒调砂。";
+              solveQuest("qb");
+              setTimeout(() => { location.href = "index.html"; }, 1000);
+            } else {
+              // 骨书 = 反法，选择失败：锁屏 2 秒
+              showFakeLock();
+              setTimeout(() => {
+                msg.className = "msg err center"; msg.textContent = "这是反法黑纸白书——骨粉养煞、从左往右画。";
+              }, 2000);
+            }
+          }, () => { /* 取消：留在黑纸辨识，无任何惩罚 */ });
         }));
     });
   }
@@ -1315,6 +1321,25 @@
     { id: "news", ico: "📰", nm: "新闻", gate: "", href: "news.html" },
     { id: "gallery", ico: "📜", nm: "图册", gate: "", href: "gallery.html" },
   ];
+  // v9(i.2): 浏览器自动播放策略下，首个用户手势即解锁 AudioContext 并拉起 ambient，无需手动点声音键
+  function armAudioAutoStart() {
+    if (!S.audio) return;
+    const kick = () => {
+      ensureAudio();
+      if (AC && AC.state === "suspended") { try { AC.resume(); } catch (e) {} }
+      if (!drone) startDrone();
+      else if (drone.real) {
+        const a = AUDIO_FILES.ambient;
+        if (a) { try { a.currentTime = 0; const pp = a.play(); if (pp && pp.catch) pp.catch(function () {}); } catch (e) {} }
+      }
+      window.removeEventListener("pointerdown", kick);
+      window.removeEventListener("touchstart", kick);
+      window.removeEventListener("keydown", kick);
+    };
+    window.addEventListener("pointerdown", kick);
+    window.addEventListener("touchstart", kick, { passive: true });
+    window.addEventListener("keydown", kick);
+  }
   function initHub() {
     const grid = $("#appgrid");
     grid.innerHTML = APPS.map((a) =>
@@ -1335,6 +1360,7 @@
     sync();
     // v9(i): 音效始终打开（默认 audio=true → 启动 drone）
     if (S.audio) { ensureAudio(); startDrone(); }
+    armAudioAutoStart();
     if (S.death) { buildBreaking(false); log("终局已至。"); return; }
     log("数据恢复完成。");
     ensureBoot();
@@ -1343,6 +1369,7 @@
   function initPage(page) {
     ensureBoot();
     if (S.audio) { ensureAudio(); startDrone(); }
+    armAudioAutoStart();
     if (S.death) buildBreaking(false);
     const map = {
       search: renderSearch, vault: renderVault, bw: renderBW, qc: renderQC,

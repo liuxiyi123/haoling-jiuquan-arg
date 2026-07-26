@@ -954,3 +954,5 @@ body.fx-signal #app{animation:signalWobble .5s ease-in-out 2;
   0%   {background:#000}
   100% {background:#1a0202}
 }
+.fake-lock{flex-direction:column;gap:14px}
+.fake-lock-sub{color:var(--txt-dim);font-size:.82rem;letter-spacing:.22em}
