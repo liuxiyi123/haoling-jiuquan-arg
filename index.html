@@ -6,13 +6,13 @@
 <title>设备回收 · 物证 A7-巳</title>
 <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body data-page="hub">
 <div id="app">
 
   <!-- 状态栏：伪装成设备，不出现任何"游戏"字样 -->
-  <header class="statusbar">
+  <header class="status-bar">
     <span class="sb-left" id="sbClock">--:--</span>
-    <span class="sb-mid" id="sbTitle">物证 A7-巳 · 恢复数据</span>
+    <span class="sb-m-id" id="sbTitle">物证 A7-巳 · 恢复数据</span>
     <span class="sb-right" id="sbProg">未解锁</span>
     <button class="toggle" id="btnAudio" type="button">声音 ○</button>
     <button class="toggle" id="btnFx" type="button">特效 ●</button>
@@ -38,18 +38,9 @@
     </aside>
   </main>
 
-  <!-- 通用视图容器 -->
-  <section class="view" id="view" hidden>
-    <div class="view-bar">
-      <button class="back" id="btnBack">⟵ 返回</button>
-      <span id="viewTitle"></span>
-    </div>
-    <div class="view-body" id="viewBody"></div>
-  </section>
-
 </div>
 
-<!-- 脚本：data.js（内容库）/ app.js（逻辑层）。终局 ARG 入口仅为 笔记 / 群聊 / 检索 / 解密门 / 讯息 -->
+<!-- 脚本：data.js（内容库）/ app.js（逻辑层）。真·多页面：首页 hub + 各功能区独立 .html -->
 <script src="data.js"></script>
 <script src="app.js"></script>
 </body>

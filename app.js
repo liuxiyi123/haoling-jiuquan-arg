@@ -1,11 +1,11 @@
 /* =========================================================================
- *  《号令九泉》ARG 原型 · 逻辑层（纯静态 / 无后端 / 离线）
+ *  《号令九泉》ARG 原型 · 逻辑层（真·多页面 / 无后端 / 离线）
+ *  导航：index.html(hub 手机壳) + 各功能区独立 .html，点击真实跳转。
  *  解密链：检索真实笔记 → 九宫门(9381) → 黑纸辨识 → 人身造化门
- *          → 渐进解锁 刘希夷的每日笔记 → 群聊记录自行拼合
- *  王鉴：每阶段发神秘来信；身份不暴露，唯一主动提醒来源。反应式检索：叛师/判师 → 被察觉。
- *  恐怖：CSS 故障/暗角/墨渗特效 + Web Audio 合成低频氛围与惊悚 sting（可开关）。
- *  图片槽位：符箓/号令/将帅先以 SVG 占位，待用户实拍补入。
- *  注：原章节式展示与收尾解锁已弃用，现改为每日笔记 + 群聊，玩家自行拼合。
+ *          → 渐进解锁 刘希夷的每日笔记 → 群聊/私信/朋友圈 自行拼合。
+ *  王鉴：boot(0)+qa(1) 开局连发；qb/qc 随解密触发（带输入延迟）；finale 仅终局后发。
+ *  恐怖：CSS 故障/暗角/墨渗 + Web Audio 低频氛围与惊悚 sting（可开关）。
+ *  人像/朋友圈/共享图：由 assets/img/ 真实生成，检索与私信/朋友圈引用。
  * ========================================================================= */
 (function () {
   "use strict";
@@ -13,6 +13,7 @@
   const KEY = "hljq:arg-full";
   const $ = (s) => document.querySelector(s);
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const PAGE = (document.body && document.body.dataset.page) || "hub";
 
   /* ---------- 进度持久化（localStorage，离线） ---------- */
   const store = {
@@ -24,14 +25,8 @@
     store.load()
   );
 
-  /* ---------- 侧栏日志 ---------- */
   const logEl = $("#logList");
-  function log(msg) {
-    const li = document.createElement("li");
-    li.textContent = msg;
-    logEl.insertBefore(li, logEl.firstChild);
-    if (logEl.children.length > 14) logEl.removeChild(logEl.lastChild);
-  }
+  function log(msg) { if (!logEl) return; const li = document.createElement("li"); li.textContent = msg; logEl.insertBefore(li, logEl.firstChild); if (logEl.children.length > 14) logEl.removeChild(logEl.lastChild); }
 
   /* ---------- 恐怖特效 + 合成音频 ---------- */
   let AC = null, drone = null, droneGain = null;
@@ -80,14 +75,12 @@
   }
   function setAudio(on) {
     S.audio = on; store.save({ audio: on });
-    $("#btnAudio").textContent = on ? "声音 ●" : "声音 ○";
-    $("#btnAudio").classList.toggle("on", on);
+    const b = $("#btnAudio"); if (b) { b.textContent = on ? "声音 ●" : "声音 ○"; b.classList.toggle("on", on); }
     if (on) { ensureAudio(); startDrone(); } else { stopDrone(); }
   }
   function setFx(on) {
     S.fx = on; store.save({ fx: on });
-    $("#btnFx").textContent = on ? "特效 ●" : "特效 ○";
-    $("#btnFx").classList.toggle("on", on);
+    const b = $("#btnFx"); if (b) { b.textContent = on ? "特效 ●" : "特效 ○"; b.classList.toggle("on", on); }
   }
 
   /* ---------- 状态栏进度 ---------- */
@@ -100,36 +93,28 @@
     return "未解锁";
   }
   function sync() {
-    $("#sbProg").textContent = progText();
+    const p = $("#sbProg"); if (p) p.textContent = progText();
     document.querySelectorAll(".app").forEach((a) => {
       const gate = a.dataset.gate;
       let ok = true;
-      if (gate === "qa") ok = S.qa;
-      else if (gate === "qb") ok = S.qb;
-      else if (gate === "qc") ok = S.qc;
+      if (gate === "qa") ok = S.qa; else if (gate === "qb") ok = S.qb; else if (gate === "qc") ok = S.qc;
       a.classList.toggle("locked", !ok);
-      const bd = a.querySelector(".badge");
-      if (bd) bd.remove();
+      const bd = a.querySelector(".badge"); if (bd) bd.remove();
       if (a.dataset.id === "msg" && S.wjUnread > 0) {
         const b = document.createElement("span"); b.className = "badge"; b.textContent = S.wjUnread; a.appendChild(b);
       }
     });
-    $("#btnAudio").textContent = S.audio ? "声音 ●" : "声音 ○";
-    $("#btnAudio").classList.toggle("on", S.audio);
-    $("#btnFx").textContent = S.fx ? "特效 ●" : "特效 ○";
-    $("#btnFx").classList.toggle("on", S.fx);
+    const ba = $("#btnAudio"); if (ba) { ba.textContent = S.audio ? "声音 ●" : "声音 ○"; ba.classList.toggle("on", S.audio); }
+    const bf = $("#btnFx"); if (bf) { bf.textContent = S.fx ? "特效 ●" : "特效 ○"; bf.classList.toggle("on", S.fx); }
   }
 
-  /* ---------- 视图路由 ---------- */
-  const hub = $("#hub"), view = $("#view"), viewBody = $("#viewBody"), viewTitle = $("#viewTitle");
-  function openView(title, html, after) {
-    hub.hidden = true; view.hidden = false;
-    viewTitle.textContent = title; viewBody.innerHTML = html;
+  /* ---------- 子页渲染容器 ---------- */
+  function showPage(title, html, after) {
+    const host = $("#pageBody"); if (host) host.innerHTML = html;
+    const t = $("#sbTitle"); if (t) t.textContent = title;
     if (after) after();
     window.scrollTo(0, 0);
   }
-  function back() { view.hidden = true; hub.hidden = false; sync(); }
-  $("#btnBack").addEventListener("click", back);
 
   /* ---------- 王鉴来信（唯一主动提醒来源） ---------- */
   function fireWJ(trigger) {
@@ -139,10 +124,21 @@
     log("收到「" + m.from + "」的讯息");
     sync();
   }
+  function fireWJDelayed(trigger, delay) {
+    const m = D.WANGJIAN.find((x) => x.trigger === trigger);
+    if (!m || S.wj.indexOf(m.id) >= 0) return;
+    log(m.from + " 正在输入…");
+    setTimeout(() => fireWJ(trigger), delay || 1400);
+  }
+  // 开局连发：boot 立即，qa 数秒后自动到（像真人在连续聊）
+  function ensureBoot() {
+    if (S.wj.indexOf(0) < 0) fireWJ("boot");
+    if (S.wj.indexOf(1) < 0) setTimeout(() => fireWJ("qa"), 4200);
+  }
   function solveQuest(id) {
     if (id === "qa" && !S.qa) { S.qa = true; store.save({ qa: true }); log("九宫门开：9381"); fireWJ("qa"); }
-    if (id === "qb" && !S.qb) { S.qb = true; store.save({ qb: true }); log("辨得正法：黑纸朱书"); fireWJ("qb"); }
-    if (id === "qc" && !S.qc) { S.qc = true; store.save({ qc: true }); log("人身造化已通"); fireWJ("qc"); }
+    if (id === "qb" && !S.qb) { S.qb = true; store.save({ qb: true }); log("辨得正法：黑纸朱书"); fireWJDelayed("qb", 1500); }
+    if (id === "qc" && !S.qc) { S.qc = true; store.save({ qc: true }); log("人身造化已通"); fireWJDelayed("qc", 1500); }
     sync();
     checkDeath();
   }
@@ -164,14 +160,13 @@
     const overlay = document.createElement("div");
     overlay.id = "doom";
     const tiles = document.createElement("div"); tiles.className = "tiles";
-    // 中央不规则「你们都要死」铺屏：以屏幕中心为核，半径向内偏置、角度随机、尺寸不一
     const N = reduceMotion ? 24 : 46;
     const cx = 50, cy = 47;
     for (let i = 0; i < N; i++) {
       const t = document.createElement("span");
       t.className = "tile"; t.textContent = "你们都要死";
       const ang = Math.random() * Math.PI * 2;
-      const rr = Math.pow(Math.random(), 0.55) * 41;   // 半径向内偏置 → 越靠中心越密
+      const rr = Math.pow(Math.random(), 0.55) * 41;
       const x = cx + Math.cos(ang) * rr * 1.16;
       const y = cy + Math.sin(ang) * rr * 0.82;
       const rot = (Math.random() * 30 - 15), sc = 0.5 + Math.random() * 1.4;
@@ -194,13 +189,12 @@
     if (S.audio) { ensureAudio(); sting(3); if (!reduceMotion) setTimeout(() => sting(2), 1300); }
 
     function finish() {
-      // 终局最后一讯：必须在恐怖演出结束后才发，不可提前
       fireWJ("finale");
       btn.style.display = "";
       btn.onclick = showJuebi;
     }
     if (perform) setTimeout(finish, reduceMotion ? 2600 : 6600);
-    else finish(); // 刷新恢复：直接呈现终局终态，不重播演出（fireWJ 已存在则幂等）
+    else finish();
     return overlay;
   }
   function showJuebi() {
@@ -223,7 +217,7 @@
     document.body.appendChild(modal);
     modal.addEventListener("click", (e) => { if (e.target === modal) modal.remove(); });
     $("#jbShare").addEventListener("click", () => doShare(text));
-    $("#jbCopy").addEventListener("click", () => { copyText(text); flash($("#jbCopy"), "已复制"); });
+    $("#jbCopy").addEventListener("click", () => { copyText(text); flash(null, "已复制"); });
   }
   function doShare(text) {
     const url = location.href;
@@ -248,8 +242,36 @@
   function flash(btn, msg) { if (btn) { const old = btn.textContent; btn.textContent = msg; setTimeout(() => (btn.textContent = old), 1400); } else { log(msg); } }
 
   /* =====================================================================
-   *  应用：检索（真实笔记 + 群聊 + 反应式）
+   *  检索（真实笔记 + 群聊 + 反应式）+ 人像（真实图）
    * ===================================================================== */
+  function portraitSVG(p) {
+    const frame = p.deceased ? "var(--anti-paper)" : "var(--iron)";
+    const sil = p.deceased ? "var(--can-bai)" : "var(--cinnabar-gold)";
+    return `<svg viewBox="0 0 120 150">
+      <rect x="6" y="6" width="108" height="138" fill="var(--ink-xuan-3)" stroke="${frame}" stroke-width="${p.deceased ? 4 : 2}"/>
+      <circle cx="60" cy="58" r="26" fill="${sil}" opacity="0.5"/>
+      <path d="M22 142 Q22 96 60 96 Q98 96 98 142 Z" fill="${sil}" opacity="0.5"/>
+      ${p.deceased ? '<text x="60" y="22" font-size="11" fill="var(--can-bai)" text-anchor="middle" letter-spacing="4">遗照</text>' : ""}
+    </svg>`;
+  }
+  function personHTML(name, p) {
+    if (S.bled.indexOf(name) < 0) { S.bled.push(name); store.save({ bled: S.bled }); }
+    const hasImg = !!(p.img);
+    const img = hasImg
+      ? `<img class="portrait-img" src="${p.img}" alt="${name}" loading="lazy">`
+      : portraitSVG(p);
+    const tag = p.deceased ? `<span class="tag death">遗照 · 已故</span>` : `<span class="tag">${p.tag}</span>`;
+    const alias = (p.alias && p.alias.length) ? `<p class="muted" style="font-size:.78rem;margin-top:6px">别名：${p.alias.join("、")}</p>` : "";
+    // 检索人物即渗血（无论生死 / 是否真图）；reduced-motion 下静态血迹
+    const bleed = '<div class="blood"></div>';
+    return `<div class="person">
+      <div class="portrait ${p.deceased ? "death" : ""} bleading">
+        ${img}${bleed}
+      </div>
+      <h4 class="pname">${name}${tag}</h4>
+      ${alias}
+    </div>`;
+  }
   function renderSearch() {
     const html = `
       <div class="searchbar">
@@ -258,12 +280,11 @@
         <button class="ex" id="clear">清空</button>
       </div>
       <div id="res"></div>`;
-    openView("检索 · 残档库", html, () => {
+    showPage("检索 · 残档库", html, () => {
       const q = $("#q"), res = $("#res");
       function run() {
         const kw = q.value.trim();
         if (!kw) return;
-        // 1) 人物：照片 / 遗照视图 + 渗血（不显示档案卡式长文案）
         let personKey = null, personHit = null;
         for (const k in D.PEOPLE) {
           const p = D.PEOPLE[k];
@@ -273,17 +294,15 @@
           res.innerHTML = personHTML(personKey, personHit);
           log("检索人物：" + personKey);
           const isFoe = !!(personHit.foe || (personHit.tag && personHit.tag.indexOf("反派") >= 0));
-          if (isFoe) horror(3); // 反派检索仍有恐怖回应，不加额外提示
+          if (isFoe) horror(3);
           return;
         }
-        // 2) 反派恐怖回应（术语型：叛师 / 判师）
         if (D.REACTIVE_KEYS.some((k) => kw.includes(k) || k.includes(kw))) {
           horror(3);
           res.innerHTML = `<div class="react"><h4>· 检索回应 ·</h4>${D.REACTIVE.lines.map((l) => `<p class="react-line">${l}</p>`).join("")}</div>`;
           log("检索：" + kw + " —— 被察觉");
           return;
         }
-        // 3) 术语 / 世界设定 / 群聊
         const out = [];
         for (const k in D.LORE) {
           if (k.includes(kw) || kw.includes(k))
@@ -292,7 +311,6 @@
         if ("九宫洛书八卦卦象".includes(kw) || kw === "九宫" || kw === "洛书") out.push(luoshuHTML());
         if ("人身造化铁围山六洞后门".includes(kw) || kw === "人身造化") out.push(bodyMapHTML());
         for (const g of D.GROUP_CHATS) {
-          if (!S[g.unlock]) continue;
           if (g.name.includes(kw) || g.tag.includes(kw) || kw.includes(g.name) ||
               g.msgs.some((m) => m.from.includes(kw) || m.text.includes(kw))) {
             out.push(`<div class="result"><h4>${g.name}<span class="tag">${g.tag}</span></h4><p>${g.intro}</p></div>`);
@@ -329,32 +347,9 @@
         ${bodyRows}
       </table></div>`;
   }
-  function portraitSVG(p) {
-    const frame = p.deceased ? "#000" : "var(--iron)";
-    const sil = p.deceased ? "var(--can-bai)" : "var(--cinnabar-gold)";
-    return `<svg viewBox="0 0 120 150">
-      <rect x="6" y="6" width="108" height="138" fill="var(--ink-xuan-3)" stroke="${frame}" stroke-width="${p.deceased ? 4 : 2}"/>
-      <circle cx="60" cy="58" r="26" fill="${sil}" opacity="0.5"/>
-      <path d="M22 142 Q22 96 60 96 Q98 96 98 142 Z" fill="${sil}" opacity="0.5"/>
-      ${p.deceased ? '<text x="60" y="22" font-size="11" fill="var(--can-bai)" text-anchor="middle" letter-spacing="4">遗照</text>' : ""}
-    </svg>`;
-  }
-  function personHTML(name, p) {
-    if (S.bled.indexOf(name) < 0) { S.bled.push(name); store.save({ bled: S.bled }); } // 渗血状态持久化
-    const tag = p.deceased ? `<span class="tag death">遗照 · 已故</span>` : `<span class="tag">${p.tag}</span>`;
-    const alias = (p.alias && p.alias.length) ? `<p class="muted" style="font-size:.78rem;margin-top:6px">别名：${p.alias.join("、")}</p>` : "";
-    return `<div class="person">
-      <div class="portrait ${p.deceased ? "death" : ""} bleeding">
-        ${portraitSVG(p)}
-        <div class="blood"></div>
-      </div>
-      <h4 class="pname">${name}${tag}</h4>
-      ${alias}
-    </div>`;
-  }
 
   /* =====================================================================
-   *  应用：保险箱（九宫门 9381）
+   *  保险箱（九宫门 9381）
    * ===================================================================== */
   function renderVault() {
     const code = D.QUESTS.qa.code;
@@ -369,7 +364,7 @@
         <div class="msg" id="vmsg"></div>
         <button class="ex" id="vclr">清除</button>
       </div>`;
-    openView("保险箱 · 四位密码", html, () => {
+    showPage("保险箱 · 四位密码", html, () => {
       const disp = $("#disp"), msg = $("#vmsg");
       function draw() { disp.textContent = buf.padEnd(4, "·"); }
       $("#pad").addEventListener("click", (e) => {
@@ -379,7 +374,7 @@
           if (buf === code) {
             msg.className = "msg ok"; msg.textContent = "咔——锁开了。";
             solveQuest("qa");
-            setTimeout(back, 800);
+            setTimeout(() => { location.href = "index.html"; }, 900);
           } else {
             msg.className = "msg err"; msg.textContent = "不对。";
             horror(1);
@@ -393,10 +388,10 @@
   }
 
   /* =====================================================================
-   *  应用：黑纸辨识（朱书 vs 白书）
+   *  黑纸辨识（朱书 vs 白书）
    * ===================================================================== */
   function renderBW() {
-    if (!S.qa) { openView("黑纸辨识", `<p class="muted center" style="padding:40px">此处暂无可见之物。</p>`); return; }
+    if (!S.qa) { showPage("黑纸辨识", `<p class="muted center" style="padding:40px">此处暂无可见之物。</p>`); return; }
     const p = D.QUESTS.qb;
     const html = `
       <p class="center" style="color:var(--txt-dim);margin-bottom:10px">${p.question}</p>
@@ -405,8 +400,8 @@
         <div class="card" data-opt="B"><h5>${p.options[1].label}</h5>${svgBaiShu()}</div>
       </div>
       <p class="msg center" id="bwmsg" style="margin-top:10px"></p>`;
-    openView("黑纸辨识 · 正法之辨", html, () => {
-      $("#viewBody").querySelectorAll(".card").forEach((c) =>
+    showPage("黑纸辨识 · 正法之辨", html, () => {
+      $("#pageBody").querySelectorAll(".card").forEach((c) =>
         c.addEventListener("click", () => {
           const id = c.dataset.opt;
           const correct = p.options.find((o) => o.id === id).correct;
@@ -415,7 +410,7 @@
             c.classList.add("sel");
             msg.className = "msg ok center"; msg.textContent = "正法。黑纸朱书——赤镇黑，以酒调砂。";
             solveQuest("qb");
-            setTimeout(back, 900);
+            setTimeout(() => { location.href = "index.html"; }, 1000);
           } else {
             msg.className = "msg err center"; msg.textContent = "这是反法黑纸白书——骨粉养煞、从左往右画。";
             horror(2);
@@ -425,10 +420,10 @@
   }
 
   /* =====================================================================
-   *  应用：人身造化（映射门）
+   *  人身造化（映射门）
    * ===================================================================== */
   function renderQC() {
-    if (!S.qb) { openView("人身造化", `<p class="muted center" style="padding:40px">此处暂无可见之物。</p>`); return; }
+    if (!S.qb) { showPage("人身造化", `<p class="muted center" style="padding:40px">此处暂无可见之物。</p>`); return; }
     const p = D.QUESTS.qc;
     const html = `
       <p class="center" style="color:var(--txt-dim);margin-bottom:12px">${p.question}</p>
@@ -436,8 +431,8 @@
         ${p.options.map((o) => `<div class="card" data-opt="${o.id}"><h5>${o.label}</h5></div>`).join("")}
       </div>
       <p class="msg center" id="qcmsg" style="margin-top:10px"></p>`;
-    openView("人身造化 · 卦象之问", html, () => {
-      $("#viewBody").querySelectorAll(".card").forEach((c) =>
+    showPage("人身造化 · 卦象之问", html, () => {
+      $("#pageBody").querySelectorAll(".card").forEach((c) =>
         c.addEventListener("click", () => {
           const id = c.dataset.opt;
           const correct = p.options.find((o) => o.id === id).correct;
@@ -446,7 +441,7 @@
             c.classList.add("sel");
             msg.className = "msg ok center"; msg.textContent = "坎一。谷道后门，水润北坎。人身即是酆都之城。";
             solveQuest("qc");
-            setTimeout(back, 900);
+            setTimeout(() => { location.href = "index.html"; }, 1000);
           } else {
             msg.className = "msg err center"; msg.textContent = "不对。";
             horror(1);
@@ -455,10 +450,8 @@
     });
   }
 
-  /* 图册入口已移除：终局 ARG 仅保留 笔记 / 群聊 / 检索 / 解密门 / 讯息 */
-
   /* =====================================================================
-   *  应用：刘希夷的笔记（每日笔记 / 发现记录，渐进解锁）
+   *  刘希夷的笔记（第一人称 · 带日期时间 · 渐进解锁）
    * ===================================================================== */
   function renderNotes() {
     const list = D.DAILY_NOTES.map((c) => {
@@ -469,14 +462,14 @@
     const html = `
       <div class="chaplist">${list}</div>
       <div id="chapHost"></div>`;
-    openView("刘希夷的笔记", html, () => {
+    showPage("刘希夷的笔记", html, () => {
       const host = $("#chapHost");
       document.querySelectorAll(".chap:not(.locked)").forEach((el) =>
         el.addEventListener("click", () => {
           const c = D.DAILY_NOTES.find((x) => x.n == el.dataset.n);
           host.innerHTML =
             `<div class="chap-body"><h3>${c.head}</h3>
-              <div class="meta">${c.date} ｜ ${c.scene}</div>
+              <div class="meta">${c.date} ｜ ${c.scene || ""}</div>
               <p>${c.body}</p></div>`;
           if (S.read.indexOf(c.n) < 0) { S.read.push(c.n); store.save({ read: S.read }); }
           log("阅：" + c.head);
@@ -486,7 +479,7 @@
   }
 
   /* =====================================================================
-   *  应用：群聊（残存记录，玩家自行拼合）
+   *  群聊（残存记录，成员匿名 A–E，玩家自猜）
    * ===================================================================== */
   function renderChats() {
     const list = D.GROUP_CHATS.map((g) => {
@@ -497,7 +490,7 @@
     const html = `
       <div class="chaplist">${list}</div>
       <div id="chatHost"></div>`;
-    openView("群聊 · 残存记录", html, () => {
+    showPage("群聊 · 残存记录", html, () => {
       const host = $("#chatHost");
       document.querySelectorAll(".chap:not(.locked)").forEach((el) =>
         el.addEventListener("click", () => {
@@ -517,7 +510,49 @@
   }
 
   /* =====================================================================
-   *  应用：讯息（王鉴来信，唯一主动提醒来源）
+   *  私信（1对1；成员匿名 A–E）
+   * ===================================================================== */
+  function renderDMs() {
+    const list = D.PRIVATE_MSGS.map((c) =>
+      `<div class="chap dm" data-w="${c.with}">
+        <img class="dm-ava" src="${c.img}" alt="${c.name}" loading="lazy">
+        <div class="n">${c.name}</div><div class="t muted">私信</div>
+      </div>`).join("");
+    const html = `<div class="chaplist dmlist">${list}</div><div id="dmHost"></div>`;
+    showPage("私信 · 残存对话", html, () => {
+      const host = $("#dmHost");
+      document.querySelectorAll(".chap.dm").forEach((el) =>
+        el.addEventListener("click", () => {
+          const c = D.PRIVATE_MSGS.find((x) => x.with === el.dataset.w);
+          const lines = c.msgs.map((m) => {
+            const me = m.from === "我";
+            return `<div class="dm-line ${me ? "me" : ""}"><span class="who">${m.from}</span><div class="txt">${m.text}</div></div>`;
+          }).join("");
+          const photo = c.photo ? `<img class="dm-photo" src="${c.photo}" alt="共享图" loading="lazy">` : "";
+          host.innerHTML =
+            `<div class="chap-body"><h3>与 ${c.name} 的私信</h3>
+              <div class="bubbles dm-bubbles">${lines}${photo}</div></div>`;
+          log("阅私信：" + c.name);
+        }));
+    });
+  }
+
+  /* =====================================================================
+   *  朋友圈（图文动态；成员匿名 A–E）
+   * ===================================================================== */
+  function renderMoments() {
+    const cards = D.MOMENTS.map((m) => {
+      const photo = m.photo ? `<img class="mo-photo" src="${m.photo}" alt="动态图" loading="lazy">` : "";
+      return `<div class="mo-card">
+        <div class="mo-head"><img class="mo-ava" src="${m.img}" alt="${m.who}" loading="lazy"><span class="mo-who">${m.who}</span><span class="mo-time">${m.time || ""}</span></div>
+        <p class="mo-text">${m.text}</p>${photo}
+      </div>`;
+    }).join("");
+    showPage("朋友圈 · 残存动态", `<div class="mo-feed">${cards}</div>`);
+  }
+
+  /* =====================================================================
+   *  讯息（王鉴来信，唯一主动提醒来源）
    * ===================================================================== */
   function renderMsg() {
     const msgs = D.WANGJIAN.filter((m) => S.wj.indexOf(m.id) >= 0)
@@ -526,50 +561,63 @@
       ? `<div class="msgs">${msgs.map((m) =>
           `<div class="msg-item"><div class="msg-from">${m.from}</div><div class="msg-text">${m.text.replace(/\n/g, "<br/>")}</div></div>`).join("")}</div>`
       : `<p class="muted center" style="padding:40px">暂无新讯息。</p>`;
-    openView("讯息 · 未知发信人", html, () => {
+    showPage("讯息 · 未知发信人", html, () => {
       if (S.wjUnread > 0) { S.wjUnread = 0; store.save({ wjUnread: 0 }); sync(); }
     });
   }
 
   /* =====================================================================
-   *  SVG 占位（仅保留 黑纸辨识 所需的 朱书 / 白书；图册入口已移除）
+   *  SVG 占位（仅保留 黑纸辨识 所需的 朱书 / 白书）
    * ===================================================================== */
   function svgZhuShu() { return `<svg viewBox="0 0 100 120"><rect width="100" height="120" fill="var(--fan-paper)"/><path d="M50 14 V108 M28 26 H72 M36 44 H64 M32 62 H68 M44 84 H56" stroke="var(--cinnabar)" stroke-width="3" fill="none"/><text x="50" y="34" font-size="11" fill="var(--cinnabar)" text-anchor="middle">应水火雷铁</text></svg>`; }
   function svgBaiShu() { return `<svg viewBox="0 0 100 120"><rect width="100" height="120" fill="var(--anti-paper)"/><path d="M30 108 V14 M72 96 H28 M64 78 H36 M68 60 H32 M56 38 H44" stroke="var(--can-bai)" stroke-width="2.4" fill="none" stroke-dasharray="2 2"/></svg>`; }
 
   /* =====================================================================
-   *  启动：应用网格
+   *  启动
    * ===================================================================== */
   const APPS = [
-    { id: "search", ico: "🔍", nm: "检索", gate: "", fn: renderSearch },
-    { id: "vault", ico: "🔒", nm: "保险箱", gate: "", fn: renderVault },
-    { id: "bw", ico: "📜", nm: "黑纸辨识", gate: "qa", fn: renderBW },
-    { id: "qc", ico: "☯", nm: "人身造化", gate: "qb", fn: renderQC },
-    { id: "notes", ico: "📓", nm: "笔记", gate: "", fn: renderNotes },
-    { id: "chats", ico: "💬", nm: "群聊", gate: "", fn: renderChats },
-    { id: "msg", ico: "✉", nm: "讯息", gate: "", fn: renderMsg },
+    { id: "search", ico: "🔍", nm: "检索", gate: "", href: "search.html" },
+    { id: "vault", ico: "🔒", nm: "保险箱", gate: "", href: "vault.html" },
+    { id: "bw", ico: "📜", nm: "黑纸辨识", gate: "qa", href: "bw.html" },
+    { id: "qc", ico: "☯", nm: "人身造化", gate: "qb", href: "qc.html" },
+    { id: "notes", ico: "📓", nm: "笔记", gate: "", href: "notes.html" },
+    { id: "chats", ico: "💬", nm: "群聊", gate: "", href: "chats.html" },
+    { id: "dms", ico: "✉", nm: "私信", gate: "", href: "dms.html" },
+    { id: "moments", ico: "🌄", nm: "朋友圈", gate: "", href: "moments.html" },
+    { id: "msg", ico: "✉", nm: "讯息", gate: "", href: "msgs.html" },
   ];
-  function boot() {
+  function initHub() {
     const grid = $("#appgrid");
     grid.innerHTML = APPS.map((a) =>
-      `<div class="app" data-id="${a.id}" data-gate="${a.gate}"><div class="ico">${a.ico}</div><div class="nm">${a.nm}</div></div>`).join("");
-    grid.querySelectorAll(".app").forEach((el) =>
-      el.addEventListener("click", () => {
+      `<a class="app" data-id="${a.id}" data-gate="${a.gate}" href="${a.href}"><div class="ico">${a.ico}</div><div class="nm">${a.nm}</div></a>`).join("");
+    grid.querySelectorAll(".app").forEach((el) => {
+      el.addEventListener("click", (e) => {
         const a = APPS.find((x) => x.id === el.dataset.id);
         const g = a.gate;
         const ok = g === "" || (g === "qa" && S.qa) || (g === "qb" && S.qb) || (g === "qc" && S.qc);
-        if (!ok) { log("「" + a.nm + "」尚不可入。"); return; }
-        a.fn();
-      }));
-    $("#btnAudio").addEventListener("click", () => setAudio(!S.audio));
-    $("#btnFx").addEventListener("click", () => setFx(!S.fx));
+        if (!ok) { e.preventDefault(); log("「" + a.nm + "」尚不可入。"); return; }
+      });
+    });
+    $("#btnAudio") && $("#btnAudio").addEventListener("click", () => setAudio(!S.audio));
+    $("#btnFx") && $("#btnFx").addEventListener("click", () => setFx(!S.fx));
     setInterval(() => { const d = new Date(); $("#sbClock").textContent = String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0"); }, 1000);
     $("#sbClock").textContent = "--:--";
     sync();
     if (S.death) { buildDoom(false); log("终局已至。"); return; }
     log("数据恢复完成。");
-    fireWJ("boot");
+    ensureBoot();
     checkDeath();
   }
-  boot();
+  function initPage(page) {
+    ensureBoot();
+    if (S.death) buildDoom(false);
+    const map = {
+      search: renderSearch, vault: renderVault, bw: renderBW, qc: renderQC,
+      notes: renderNotes, chats: renderChats, dms: renderDMs, moments: renderMoments, msgs: renderMsg,
+    };
+    if (map[page]) map[page]();
+    sync();
+  }
+
+  if (PAGE === "hub") initHub(); else initPage(PAGE);
 })();
