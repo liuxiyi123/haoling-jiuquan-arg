@@ -35,7 +35,7 @@ window.HLJQ_DATA = (function () {
   /* ---------- 人物（v8：头像全用真拍；王付岩 / 王鉴 留空走 SVG portrait fallback） ---------- */
   const PEOPLE = {
     "刘希夷": {
-      alias: ["朽孽翁", "希夷"], tag: "本门 · 法官", age: 18, img: IMG + "wxliuxiyi.jpg",
+      alias: ["朽孽翁", "希夷"], tag: "本门 · 法官", age: 18, img: "",
       wechat: "xuanlei_xiyi",
       birthday: { stemBranch: "戊子", year: 2008, month: 6, day: 7, zodiac: "鼠" },
       line: "十八岁，南阳守玄雷坛传承弟子，北帝酆岳派法官，号朽孽翁。稍胖壮，长发，常捏着冰爆珠烟压惊。",
@@ -51,22 +51,22 @@ window.HLJQ_DATA = (function () {
       line: "刘希夷租住老宅楼下的修车师傅，中年人。话不多，常深夜在坛场门外，出手方式不属任何已知门派。",
     },
     "麻三": {
-      alias: ["路遥", "麻红福"], tag: "同道 · 巴代", age: 20, img: IMG + "wxluyao.jpg",
+      alias: ["路遥", "麻红福"], tag: "同道 · 巴代", age: 20, img: "",
       wechat: "badai_ma_luyao",
       birthday: { stemBranch: "丙戌", year: 2006, month: 2, day: 26, zodiac: "狗" },
       line: "二十岁，苗族青年，家传元皇巴代法（法名麻法虎），贵州铜仁松桃梅沼村人，现居福建。瘦，爷爷传下的法脉已逝三年。",
     },
     "孙师": {
-      alias: ["千寻"], tag: "同道 · 灵宝", age: 20, img: IMG + "wxqianxun.jpg",
+      alias: ["千寻"], tag: "同道 · 灵宝", age: 20, img: "",
       wechat: "lingbao_qianxun",
       birthday: { stemBranch: "丙戌", year: 2006, month: 6, day: 7, zodiac: "狗" },
       line: "二十岁，网名千寻，刘希夷称其师傅。主灵宝斋醮科仪、度亡炼度。瘦，长发，原大连人，迁居重庆。",
     },
     "贾生": {
-      alias: ["王范家传"], tag: "同道 · 西河铁师", age: 23, img: IMG + "wxjiasheng.jpg",
+      alias: ["王范家传"], tag: "同道 · 西河铁师", age: 23, img: "",
       wechat: "wangfjia_uber",
       birthday: { stemBranch: "癸未", year: 2003, month: 6, day: 7, zodiac: "羊" },
-      line: "二十三岁，原名王范家传，学西北西河铁师法，主将王灵官。四川人，现于杭州跑滴滴谋生。",
+      line: "原名王范家传，学西北西河铁师法，主将王灵官。四川人，现于杭州跑滴滴谋生。",
     },
     "迟浩亮": {
       alias: [], tag: "同道 · 奇门风水", age: 22, img: IMG + "chihaoliang-meizhao.jpg",
@@ -346,9 +346,6 @@ window.HLJQ_DATA = (function () {
       text: "照度师规矩，九泉号令重书了一张黑纸朱书。朱砂须以酒调开——酒性烈而透，能把赤金底色激出来。胶调的是死的。" },
     { who: "桐凤斋", img: IMG + "wxtongfengzhai.jpg", photo: IMG + "tongfengzhai-moments.jpg", time: "4月3日 09:40",
       text: "这是今早裱好的『靖定』。法不在速，在定。定住一笔，是一辈子的功夫。" },
-    /* 反法图入库：C 老贾随手晒图，等同道识别来源——暗藏玩家可追的"反酆都"线索 */
-    { who: "西河老贾", img: IMG + "wxjiasheng.jpg", photo: IMG + "heizhi-baishu.jpg", time: "3月27日 11:40",
-      text: "网上翻到的鬼画符，骨粉写成。骨粉我认得——这位画的人绝不是野路子。我却认不出他网名。有认得的喊一声，我收。" },
   ];
 
   /* ---------- 新闻流（v8 沿用 v7；沈某投稿仅提属相） ---------- */
@@ -377,12 +374,8 @@ window.HLJQ_DATA = (function () {
     title: "同道论坛",
     subtitle: "妙林斋 · 道门杂谈 · 匿名",
     known: {
-      wechat: "badai_ma_luyao",
-      name: "巴代路遥",
-      realName: "麻红福",
-      birthday: "2006年2月26日",
-      password: "mahongfu060226",
-      note: "密码 = 本名（麻红福 → mahongfu）＋出生年月日（2006-02-26 → 060226）。路遥说：密码就是本名加出生年月日。",
+      password: "060226",
+      hint: "密码见出生年月日（路遥 2006-02-26）。",
     },
     threads: [
       {

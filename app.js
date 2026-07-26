@@ -295,7 +295,7 @@
   const WJ_PROTECT_TEXT = "别再查了。他们已经死了。继续只会让你陷得更深。\n去微信里看完我说的话，再回来。";
   const WJ_FIVE = ["刘希夷", "麻三", "孙师", "贾生", "迟浩亮"];
   function maybeShowWangjianProtect(personKey) {
-    if (S.truth) return;
+    if (!S.truth) return;
     if (!WJ_FIVE.includes(personKey)) return;
     if (S.wjProtectDismissed.indexOf(personKey) >= 0) return;
     S.wjProtectDismissed.push(personKey);
@@ -865,22 +865,17 @@
   function renderForum() {
     const k = D.FORUM.known;
     const locked = !S.forumUnlocked;
-    const knownCard =
-      '<div class="forum-known">' +
-        '<div class="forum-known-title">已知账号</div>' +
-        '<div class="forum-known-row"><span class="lbl">WeChat</span><code>' + k.wechat + '</code></div>' +
-        '<div class="forum-known-row"><span class="lbl">昵称</span>' + k.name + '</div>' +
-        '<div class="forum-known-row"><span class="lbl">真名</span>' + k.realName + '</div>' +
-        '<div class="forum-known-row"><span class="lbl">生日</span>' + k.birthday + '</div>' +
-        '<div class="forum-known-row"><span class="lbl">密码线索</span><code>' + k.note + '</code></div>' +
-        (locked
-          ? '<div class="forum-known-gate">' +
-              '<input id="forumPw" placeholder="输入密码查看帖子" autocomplete="off" />' +
-              '<button id="forumPwGo" type="button">解锁</button>' +
-              '<div class="forum-known-msg muted" id="forumPwMsg"></div>' +
-            '</div>'
-          : '<div class="forum-known-note muted">已解锁 · 帖子可阅</div>') +
-      '</div>';
+    const loginCard =
+      (locked
+        ? '<div class="forum-login">' +
+            '<div class="forum-login-title">登录查看帖子</div>' +
+            '<div class="forum-login-row"><input id="forumUser" placeholder="账号" autocomplete="off" /></div>' +
+            '<div class="forum-login-row"><input id="forumPw" type="password" placeholder="密码" autocomplete="off" /></div>' +
+            '<div class="forum-login-row"><button id="forumPwGo" type="button">登录</button>' +
+              '<div class="forum-known-msg muted" id="forumPwMsg"></div></div>' +
+            '<div class="forum-login-hint muted">' + k.hint + '</div>' +
+          '</div>'
+        : '<div class="forum-known-note muted">已解锁 · 帖子可阅</div>');
     const threads = (D.FORUM.threads || []).filter((t) => S.shenUnlocked || t.authorWechat !== "tfc_jiacheng");
     const list = threads.map((t) =>
       '<div class="forum-thread-item' + (locked ? ' locked' : '') + '" data-id="' + t.id + '">' +
@@ -893,7 +888,7 @@
       '</div>').join("");
     const html =
       '<div class="forum-wrap">' +
-        knownCard +
+        loginCard +
         '<div class="forum-thread-list">' + list + '</div>' +
         '<div id="forumThreadHost"></div>' +
       '</div>';
@@ -901,13 +896,19 @@
       if (locked) {
         const go = document.getElementById("forumPwGo");
         const inp = document.getElementById("forumPw");
+        const usr = document.getElementById("forumUser");
         const msg = document.getElementById("forumPwMsg");
         const tryUnlock = () => {
+          const u = ((usr && usr.value) || "").trim();
           const v = (inp.value || "")
             .replace(/\s+/g, "")
             .replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
             .toLowerCase();
-          if (v === "2006226") {
+          if (!u) {
+            msg.className = "forum-known-msg err"; msg.textContent = "请输入账号。";
+            return;
+          }
+          if (v === "060226") {
             S.forumUnlocked = true; store.save({ forumUnlocked: true });
             renderForum();
           } else {
@@ -917,6 +918,7 @@
         };
         go.onclick = tryUnlock;
         inp.addEventListener("keydown", (e) => { if (e.key === "Enter") tryUnlock(); });
+        if (usr) usr.addEventListener("keydown", (e) => { if (e.key === "Enter") inp.focus(); });
       } else {
         document.querySelectorAll(".forum-thread-item").forEach((el) =>
           el.addEventListener("click", () => {

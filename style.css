@@ -554,19 +554,27 @@ body.fx-signal #app{animation:signalWobble .5s ease-in-out 2;
 .wx-bubble.me .wx-bubble-who{text-align:right;color:rgba(255,255,255,.72)}
 .wx-photo{margin-top:10px;width:100%;max-width:300px;border-radius:10px;border:1px solid var(--line);display:block}
 
-/* 论坛：已知账号卡（开放浏览，无登录） */
-.forum-known{
+/* 论坛：登录卡（账号 + 密码，无账号卡） */
+.forum-login{
   max-width:620px;margin:0 auto 18px;
   background:linear-gradient(180deg,var(--ink-xuan-2),var(--ink-xuan));
-  border:1px solid var(--cinnabar-gold);border-radius:14px;padding:16px 18px;
+  border:1px solid var(--cinnabar-gold);border-radius:14px;padding:18px;
   box-shadow:0 0 26px rgba(201,162,75,.12);
 }
-.forum-known-title{color:var(--cinnabar-gold);font-size:.82rem;letter-spacing:.18em;margin-bottom:12px}
-.forum-known-row{display:flex;align-items:baseline;gap:10px;padding:6px 0;border-bottom:1px dashed rgba(201,162,75,.14);font-size:.9rem}
-.forum-known-row:last-of-type{border-bottom:none}
-.forum-known-row .lbl{color:var(--txt-dim);font-size:.74rem;min-width:52px;letter-spacing:.04em}
-.forum-known-row code{color:var(--cinnabar-gold);font-family:ui-monospace,monospace;font-size:.9rem;word-break:break-all}
-.forum-known-note{font-size:.76rem;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+.forum-login-title{color:var(--cinnabar-gold);font-size:.84rem;letter-spacing:.18em;margin-bottom:12px}
+.forum-login-row{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.forum-login-row input{
+  flex:1 1 140px;min-width:120px;background:var(--ink-xuan-3);
+  border:1px solid var(--iron);border-radius:8px;color:var(--txt);
+  padding:9px 12px;font-size:.88rem;outline:none;
+}
+.forum-login-row input:focus{border-color:var(--can-bai)}
+.forum-login-row button{
+  background:var(--wechat-green);color:var(--qr-white);border:none;
+  border-radius:8px;padding:9px 16px;font-size:.86rem;cursor:pointer;
+}
+.forum-login-hint{margin-top:10px;font-size:.72rem;letter-spacing:.02em;opacity:.7}
+.forum-known-note{font-size:.76rem;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);text-align:center}
 
 /* 移动端：wx 列表与气泡更贴边 */
 @media (max-width:720px){
