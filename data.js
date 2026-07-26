@@ -69,7 +69,7 @@ window.HLJQ_DATA = (function () {
       line: "二十三岁，原名王范家传，学西北西河铁师法，主将王灵官。四川人，现于杭州跑滴滴谋生。",
     },
     "迟浩亮": {
-      alias: [], tag: "同道 · 奇门风水", age: 22, img: IMG + "chihaoliang.jpg",
+      alias: [], tag: "同道 · 奇门风水", age: 22, img: IMG + "chihaoliang-meizhao.jpg",
       wechat: "qimen_chi",
       birthday: { stemBranch: "甲申", year: 2004, month: 6, day: 7, zodiac: "猴" },
       line: "二十二岁，辽宁大连人，在苏州经营奇门风水工作室。只学奇门遁甲与风水堪舆，不学道法科仪。",
@@ -306,7 +306,7 @@ window.HLJQ_DATA = (function () {
         { from: "我", text: "（看图）威严。雷霆一道，正克邪法。" },
         { from: "西河老贾", text: "你号令锁，我雷霆锤。锁锤合一，叛师也扛不住。" },
       ], photo: IMG + "wang-lingguan.jpg" },
-    { with: "迟哥", name: "奇门迟", img: IMG + "chihaoliang.jpg",
+    { with: "迟哥", name: "奇门迟", img: IMG + "chihaoliang-meizhao.jpg",
       msgs: [
         { from: "奇门迟", text: "南阳为地盘、受害时为时辰，我排过了。邪师法坛在铜仁方向，和路遥老家同域。我苏州开工作室。" },
         { from: "我", text: "能再缩么？" },
@@ -333,7 +333,7 @@ window.HLJQ_DATA = (function () {
       text: "今晨在桐乡的山里开面，朱砂落了七八笔，将帅开了面，邪法就遮不住。开面符的难不在笔，在定。" },
     { who: "我", img: IMG + "wxliuxiyi.jpg", photo: IMG + "liuxiyi-tan.jpg", time: "4月1日 14:10",
       text: "坛布挂好了。今天我才知道——法衣不是穿的，是撑的。撑起来，才压得住。" },
-    { who: "奇门迟", img: IMG + "chihaoliang.jpg", photo: IMG + "chihaoliang-meizhao.jpg", time: "3月25日 00:30",
+    { who: "奇门迟", img: IMG + "chihaoliang-meizhao.jpg", photo: IMG + "chihaoliang-meizhao.jpg", time: "3月25日 00:30",
       text: "梅沼的远山，今早我站在高处拍了下来。这片地气被人为改了——众水朝堂本是聚气格局，若被人散了风、放出煞，是要破局的前兆。先复原，再破坛。" },
     { who: "灵宝千寻", img: IMG + "wxqianxun.jpg", time: "3月21日 16:05",
       text: "灵宝度亡不是刀，是药。缺这味，坛场就只剩杀伐。" },
