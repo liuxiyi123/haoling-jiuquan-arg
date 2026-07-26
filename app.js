@@ -413,6 +413,10 @@
           if (k.includes(kw) || kw.includes(k))
             out.push(`<div class="result"><h4>${k}<span class="tag">世界设定</span></h4><p>${D.LORE[k]}</p></div>`);
         }
+        if (D.DAOZANG) for (const k in D.DAOZANG) {
+          if (k.includes(kw) || kw.includes(k))
+            out.push(`<div class="result"><h4>${k}<span class="tag">道藏</span></h4><p>${D.DAOZANG[k]}</p></div>`);
+        }
         if ("九宫洛书八卦卦象".includes(kw) || kw === "九宫" || kw === "洛书") out.push(luoshuHTML());
         if ("人身造化铁围山六洞后门".includes(kw) || kw === "人身造化") out.push(bodyMapHTML());
         for (const g of D.GROUP_CHATS) {
@@ -500,8 +504,8 @@
     const html = `
       <p class="center" style="color:var(--txt-dim);margin-bottom:10px">${p.question}</p>
       <div class="bw">
-        <div class="card" data-opt="A"><h5>${p.options[0].label}</h5>${svgZhuShu()}</div>
-        <div class="card" data-opt="B"><h5>${p.options[1].label}</h5>${svgBaiShu()}</div>
+        <div class="card" data-opt="A"><h5>${p.options[0].label}</h5><img class="bw-img" src="assets/img/gal-bw-zhushu.png" alt="黑纸朱书" loading="lazy"></div>
+        <div class="card" data-opt="B"><h5>${p.options[1].label}</h5><img class="bw-img" src="assets/img/gal-bw-baishu.png" alt="黑纸白书" loading="lazy"></div>
       </div>
       <p class="msg center" id="bwmsg" style="margin-top:10px"></p>`;
     showPage("黑纸辨识 · 正法之辨", html, () => {
@@ -552,6 +556,21 @@
           }
         }));
     });
+  }
+
+  /* =====================================================================
+   *  图册（实拍图 + 道藏解释）
+   * ===================================================================== */
+  function renderGallery() {
+    const items = (D.GALLERY || []).map((g) =>
+      `<div class="gal-card">
+        <img class="gal-img" src="${g.img}" alt="${g.key}" loading="lazy">
+        <div class="gal-body">
+          <h4 class="gal-title">${g.key}</h4>
+          <p class="gal-text">${g.body}</p>
+        </div>
+      </div>`).join("");
+    showPage("图册 · 道藏残页", `<div class="gal-feed">${items}</div>`);
   }
 
   /* =====================================================================
@@ -942,6 +961,7 @@
     { id: "wx", ico: "💬", nm: "微信", gate: "", href: "wx.html" },
     { id: "forum", ico: "💭", nm: "论坛", gate: "", href: "forum.html" },
     { id: "news", ico: "📰", nm: "新闻", gate: "", href: "news.html" },
+    { id: "gallery", ico: "📜", nm: "图册", gate: "", href: "gallery.html" },
   ];
   function initHub() {
     const grid = $("#appgrid");
@@ -972,7 +992,7 @@
     const map = {
       search: renderSearch, vault: renderVault, bw: renderBW, qc: renderQC,
       notes: renderNotes, news: renderNews, forum: renderForum, truth: renderTruth,
-      wx: renderWX,
+      wx: renderWX, gallery: renderGallery,
     };
     if (map[page]) map[page]();
     sync();

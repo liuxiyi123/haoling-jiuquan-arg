@@ -144,6 +144,7 @@ body{
 .bw .card.sel{border-color:var(--ok)}
 .bw .card h5{color:var(--cinnabar-gold);font-size:.9rem;margin-bottom:8px}
 .bw .card svg{width:100%;height:120px;display:block}
+.bw-img{width:100%;height:auto;max-height:260px;object-fit:cover;display:block;border-radius:8px;background:var(--ink-xuan-3);margin-top:4px}
 
 /* 残卷 · 笔记列表 */
 .chaplist{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
@@ -604,3 +605,11 @@ body.fx-signal #app{animation:signalWobble .5s ease-in-out 2;
 .forum-known-msg{margin-top:8px;font-size:.78rem}
 .forum-known-msg.err{color:var(--can-bai)}
 .forum-read-item.locked{opacity:.5;cursor:not-allowed}
+
+/* v9(d) · 图册（实拍图 + 道藏解释） */
+.gal-feed{display:grid;gap:18px;max-width:640px;margin:0 auto}
+.gal-card{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--ink-xuan-2)}
+.gal-img{width:100%;height:auto;display:block}
+.gal-body{padding:16px 16px 20px}
+.gal-title{color:var(--cinnabar-gold);font-size:1.02rem;letter-spacing:.06em;margin-bottom:8px}
+.gal-text{font-size:.88rem;color:var(--txt);line-height:1.9}
