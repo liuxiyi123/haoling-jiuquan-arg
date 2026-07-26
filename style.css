@@ -561,3 +561,20 @@ body.fx-flicker #app{animation:flick .5s steps(3) 2}
 }
 .wx-ava-fallback.wx-ava{width:44px;height:44px}
 .wx-ava-fallback.wx-ava-sm{width:34px;height:34px;font-size:.95rem}
+/* =====================================================================
+ *  v9 · 论坛密码门 + 沈某锁（gate / locked 态样式）
+ * ===================================================================== */
+.forum-known-gate{margin-top:10px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.forum-known-gate input{
+  flex:1 1 140px;min-width:120px;background:var(--ink-xuan-3);
+  border:1px solid var(--iron);border-radius:8px;color:var(--txt);
+  padding:8px 10px;font-size:.86rem;outline:none;
+}
+.forum-known-gate input:focus{border-color:var(--can-bai)}
+.forum-known-gate button{
+  background:var(--wechat-green);color:var(--qr-white);border:none;
+  border-radius:8px;padding:8px 14px;font-size:.84rem;cursor:pointer;
+}
+.forum-known-msg{margin-top:8px;font-size:.78rem}
+.forum-known-msg.err{color:var(--can-bai)}
+.forum-read-item.locked{opacity:.5;cursor:not-allowed}

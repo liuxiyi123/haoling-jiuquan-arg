@@ -35,7 +35,7 @@ window.HLJQ_DATA = (function () {
   /* ---------- 人物（v8：头像全用真拍；王付岩 / 王鉴 留空走 SVG portrait fallback） ---------- */
   const PEOPLE = {
     "刘希夷": {
-      alias: ["朽孽翁", "希夷"], tag: "本门 · 法官", age: 18, img: IMG + "wxliuxiyi.png",
+      alias: ["朽孽翁", "希夷"], tag: "本门 · 法官", age: 18, img: IMG + "wxliuxiyi.jpg",
       wechat: "xuanlei_xiyi",
       birthday: { stemBranch: "戊子", year: 2008, month: 6, day: 7, zodiac: "鼠" },
       line: "十八岁，南阳守玄雷坛传承弟子，北帝酆岳派法官，号朽孽翁。稍胖壮，长发，常捏着冰爆珠烟压惊。",
@@ -51,31 +51,31 @@ window.HLJQ_DATA = (function () {
       line: "刘希夷租住老宅楼下的修车师傅，中年人。话不多，常深夜在坛场门外，出手方式不属任何已知门派。",
     },
     "麻三": {
-      alias: ["路遥", "麻红福"], tag: "同道 · 巴代", age: 20, img: IMG + "wxluyao.png",
+      alias: ["路遥", "麻红福"], tag: "同道 · 巴代", age: 20, img: IMG + "wxluyao.jpg",
       wechat: "badai_ma_luyao",
-      birthday: { stemBranch: "丙戌", year: 2006, month: 6, day: 7, zodiac: "狗" },
+      birthday: { stemBranch: "丙戌", year: 2006, month: 2, day: 26, zodiac: "狗" },
       line: "二十岁，苗族青年，家传元皇巴代法（法名麻法虎），贵州铜仁松桃梅沼村人，现居福建。瘦，爷爷传下的法脉已逝三年。",
     },
     "孙师": {
-      alias: ["千寻"], tag: "同道 · 灵宝", age: 20, img: IMG + "wxqianxun.png",
+      alias: ["千寻"], tag: "同道 · 灵宝", age: 20, img: IMG + "wxqianxun.jpg",
       wechat: "lingbao_qianxun",
       birthday: { stemBranch: "丙戌", year: 2006, month: 6, day: 7, zodiac: "狗" },
       line: "二十岁，网名千寻，刘希夷称其师傅。主灵宝斋醮科仪、度亡炼度。瘦，长发，原大连人，迁居重庆。",
     },
     "贾生": {
-      alias: ["王范家传"], tag: "同道 · 西河铁师", age: 23, img: IMG + "wxjiasheng.png",
+      alias: ["王范家传"], tag: "同道 · 西河铁师", age: 23, img: IMG + "wxjiasheng.jpg",
       wechat: "wangfjia_uber",
       birthday: { stemBranch: "癸未", year: 2003, month: 6, day: 7, zodiac: "羊" },
       line: "二十三岁，原名王范家传，学西北西河铁师法，主将王灵官。四川人，现于杭州跑滴滴谋生。",
     },
     "迟浩亮": {
-      alias: [], tag: "同道 · 奇门风水", age: 22, img: IMG + "chihaoliang.png",
+      alias: [], tag: "同道 · 奇门风水", age: 22, img: IMG + "chihaoliang.jpg",
       wechat: "qimen_chi",
       birthday: { stemBranch: "甲申", year: 2004, month: 6, day: 7, zodiac: "猴" },
       line: "二十二岁，辽宁大连人，在苏州经营奇门风水工作室。只学奇门遁甲与风水堪舆，不学道法科仪。",
     },
     "沈佳诚": {
-      alias: ["桐凤斋"], tag: "同道 · 开面符", age: 18, img: IMG + "wxtongfengzhai.png",
+      alias: ["桐凤斋"], tag: "同道 · 开面符", age: 18, img: IMG + "wxtongfengzhai.jpg",
       wechat: "tfc_jiacheng",
       birthday: { stemBranch: "戊子", year: 2008, month: 6, day: 7, zodiac: "鼠" },
       line: "十八岁，网名桐凤斋，浙江嘉兴人。主桐乡开面符＋江南清微，今年刚高考完，准备去杭州中国美院。",
@@ -243,69 +243,69 @@ window.HLJQ_DATA = (function () {
 
   /* ---------- 私信（v8：用亲密称呼 + 真拍共享图） ---------- */
   const PRIVATE_MSGS = [
-    { with: "路遥", name: "巴代路遥", img: IMG + "wxluyao.png",
+    { with: "路遥", name: "巴代路遥", img: IMG + "wxluyao.jpg",
       msgs: [
         { from: "巴代路遥", text: "刘哥，我高铁票订了，后日到南阳。巴代法器我都带上了——墨符册、师刀、法衣。" },
         { from: "我", text: "一路小心。到了先歇脚，莫急着上坛。你才二十，别硬扛。" },
         { from: "巴代路遥", text: "放心。爷爷说过，请神不是冲，是稳。我护外围，你主攻，错不了。" },
         { from: "巴代路遥", text: "（深夜）刘哥，论坛上有点线索。我把 WeChat 发你：badai_ma_luyao。你登上看。" },
         { from: "我", text: "密码呢？" },
-        { from: "巴代路遥", text: "你自己想。真名，加上生辰年干支，就是密码。这事我不能说破。" },
-      ], photo: IMG + "luyao-faqi.png" },
-    { with: "千寻", name: "灵宝千寻", img: IMG + "wxqianxun.png",
+        { from: "巴代路遥", text: "你自己想。出生年、月、日连起来——八位数字，就是密码。这事我不能说破。" },
+      ], photo: IMG + "luyao-fayi.jpg" },
+    { with: "千寻", name: "灵宝千寻", img: IMG + "wxqianxun.jpg",
       msgs: [
         { from: "灵宝千寻", text: "希夷，你坛场那几张符，镇煞够，度亡缺。我带了两道灵宝度亡的科仪本子，到南阳给你看。" },
         { from: "我", text: "师傅费心。我读得懂，只是没传这法。你我同岁。" },
         { from: "灵宝千寻", text: "法在书上，人在路上。你守得住正，我补得上药，这就齐了。" },
       ] },
-    { with: "老贾", name: "西河老贾", img: IMG + "wxjiasheng.png",
+    { with: "老贾", name: "西河老贾", img: IMG + "wxjiasheng.jpg",
       msgs: [
         { from: "西河老贾", text: "刘兄弟，王灵官的法相我拍了张，你先认认。变神为祖师，召的是这位怒目金刚。我跑滴滴。" },
         { from: "我", text: "（看图）威严。雷霆一道，正克邪法。" },
         { from: "西河老贾", text: "你号令锁，我雷霆锤。锁锤合一，叛师也扛不住。" },
-      ], photo: IMG + "bajiang.png" },
-    { with: "迟哥", name: "奇门迟", img: IMG + "chihaoliang.png",
+      ], photo: IMG + "wang-lingguan.jpg" },
+    { with: "迟哥", name: "奇门迟", img: IMG + "chihaoliang.jpg",
       msgs: [
         { from: "奇门迟", text: "南阳为地盘、受害时为时辰，我排过了。邪师法坛在铜仁方向，和路遥老家同域。我苏州开工作室。" },
         { from: "我", text: "能再缩么？" },
         { from: "奇门迟", text: "能。那处地气被人为改了，散风放煞——是逆转风水。破坛前，得先把它复原。" },
-      ], photo: IMG + "chihaoliang.png" },
-    { with: "桐凤", name: "桐凤斋", img: IMG + "wxtongfengzhai.png",
+      ], photo: IMG + "chihaoliang.jpg" },
+    { with: "桐凤", name: "桐凤斋", img: IMG + "wxtongfengzhai.jpg",
       msgs: [
         { from: "桐凤斋", text: "刘哥，开面符我画好了，拍照传你！将帅面相勾了轮廓，朱砂落了墨，邪法就遮不住。" },
         { from: "我", text: "（看图）笔力稳。我照这图在黑纸上临摹，注祖气。" },
         { from: "桐凤斋", text: "符法核心不是祖气，是『诚』。你信它，它就灵。" },
-      ], photo: IMG + "kaimianfu.png" },
+      ], photo: IMG + "kaimianfu.jpg" },
   ];
 
   /* ---------- 朋友圈（v8：实拍配图 · 文案匹配图意 · 路遥生日算 50 天） ---------- */
   /* 当前时间锚 2026/7/27 凌晨；路遥生日 6/7 → 7/27 已过 50 天。 */
   const MOMENTS = [
-    { who: "我", img: IMG + "wxliuxiyi.png", photo: IMG + "meizhao.png", time: "4月3日 03:30",
+    { who: "我", img: IMG + "wxliuxiyi.jpg", photo: IMG + "meizhao.jpg", time: "4月3日 03:30",
       text: "今天站在梅沼的旧道上，望着远处的山雾。风里带咸，也许是某处的坛被人重新点起来了。" },
-    { who: "巴代路遥", img: IMG + "wxluyao.png", photo: IMG + "luyao-faqi.png", time: "3月28日 20:00",
-      text: "今天是我二十岁生日过后的整 50 天。再过 23 天，我就二十一了。家里这两件都是爷爷传下来的法器——师刀、墨符册。老祖宗的东西不能丢。" },
-    { who: "西河老贾", img: IMG + "wxjiasheng.png", photo: IMG + "dizhuang.png", time: "3月24日 23:00",
+    { who: "巴代路遥", img: IMG + "wxluyao.jpg", photo: IMG + "luyao-faqi.jpg", time: "3月28日 20:00",
+      text: "距离我生日已经过去 30 天了。家里这两件都是爷爷传下来的法器——师刀、墨符册。老祖宗的东西不能丢。" },
+    { who: "西河老贾", img: IMG + "wxjiasheng.jpg", photo: IMG + "dizhuang.jpg", time: "3月24日 23:00",
       text: "西河铁师一脉的金字。北帝亲赐魏天君的金盘秘字——不是条文，是直接的意志。法律可以反，意志不行。" },
-    { who: "桐凤斋", img: IMG + "wxtongfengzhai.png", photo: IMG + "kaimianfu.png", time: "4月1日 07:00",
+    { who: "桐凤斋", img: IMG + "wxtongfengzhai.jpg", photo: IMG + "kaimianfu.jpg", time: "4月1日 07:00",
       text: "今晨在桐乡的山里开面，朱砂落了七八笔，将帅开了面，邪法就遮不住。开面符的难不在笔，在定。" },
-    { who: "我", img: IMG + "wxliuxiyi.png", photo: IMG + "liuxiyi-tan.png", time: "4月1日 14:10",
+    { who: "我", img: IMG + "wxliuxiyi.jpg", photo: IMG + "liuxiyi-tan.jpg", time: "4月1日 14:10",
       text: "坛布挂好了。今天我才知道——法衣不是穿的，是撑的。撑起来，才压得住。" },
-    { who: "奇门迟", img: IMG + "chihaoliang.png", photo: IMG + "chihaoliang.png", time: "3月25日 00:30",
+    { who: "奇门迟", img: IMG + "chihaoliang.jpg", photo: IMG + "chihaoliang.jpg", time: "3月25日 00:30",
       text: "这条路回来太久了，山雨欲来。我把这一段给几位同道看了——众水朝堂，是聚气的格局；若被人为改了散风放煞，是要破局的前兆。先复原，再破坛。" },
-    { who: "灵宝千寻", img: IMG + "wxqianxun.png", time: "3月21日 16:05",
+    { who: "灵宝千寻", img: IMG + "wxqianxun.jpg", time: "3月21日 16:05",
       text: "灵宝度亡不是刀，是药。缺这味，坛场就只剩杀伐。" },
-    { who: "巴代路遥", img: IMG + "wxluyao.png", time: "3月19日 12:20",
+    { who: "巴代路遥", img: IMG + "wxluyao.jpg", time: "3月19日 12:20",
       text: "爷爷说过梅沼村那矿洞不干净。我从小就不敢近。" },
     /* —— v8 新增：凑齐 10 张共用素材 —— */
-    { who: "我", img: IMG + "wxliuxiyi.png", photo: IMG + "bajiang.png", time: "4月2日 18:30",
+    { who: "我", img: IMG + "wxliuxiyi.jpg", photo: IMG + "bajiang.jpg", time: "4月2日 18:30",
       text: "内坛八将：韦锡、刘锄、王鉴、孟锄、车资、夏奎、劣铠、桑铜——今晚把祖师留下的神将请出来，一并验过。位次不可乱。" },
-    { who: "我", img: IMG + "wxliuxiyi.png", photo: IMG + "heizhi-zhushu.png", time: "4月1日 22:10",
+    { who: "我", img: IMG + "wxliuxiyi.jpg", photo: IMG + "heizhi-zhushu.jpg", time: "4月1日 22:10",
       text: "照度师规矩，九泉号令重书了一张黑纸朱书。朱砂须以酒调开——酒性烈而透，能把赤金底色激出来。胶调的是死的。" },
-    { who: "桐凤斋", img: IMG + "wxtongfengzhai.png", photo: IMG + "tongfengzhai-shufa.png", time: "4月3日 09:40",
+    { who: "桐凤斋", img: IMG + "wxtongfengzhai.jpg", photo: IMG + "tongfengzhai-shufa.jpg", time: "4月3日 09:40",
       text: "这是今早裱好的『靖定』。法不在速，在定。定住一笔，是一辈子的功夫。" },
     /* 反法图入库：C 老贾随手晒图，等同道识别来源——暗藏玩家可追的"反酆都"线索 */
-    { who: "西河老贾", img: IMG + "wxjiasheng.png", photo: IMG + "heizhi-baishu.png", time: "3月27日 11:40",
+    { who: "西河老贾", img: IMG + "wxjiasheng.jpg", photo: IMG + "heizhi-baishu.jpg", time: "3月27日 11:40",
       text: "网上翻到的鬼画符，骨粉写成。骨粉我认得——这位画的人绝不是野路子。我却认不出他网名。有认得的喊一声，我收。" },
   ];
 
@@ -326,7 +326,7 @@ window.HLJQ_DATA = (function () {
       text: "三地均有『精神崩溃』『异响』『黑影』相关零散帖文，出现后多被快速删除。IP 分布显示，相关群组成员遍及南阳、信阳、驻马店、平顶山，乃至洛阳、郑州。" },
     { src: "浙江嘉兴 · 读者投稿", tag: "投稿", date: "2026-04-06",
       title: "沈某投稿：我有点小道消息",
-      text: "我是嘉兴的，跟前面那位刘哥学过开面符。我不敢说太多。\n你们要找的那五个，他们生辰属相是：鼠、狗、狗、羊、猴。剩下的，你们自己去查——这部手机里，有他们的资料。\n我是活下来的人。我把话说到这里，剩下的，看你们。" },
+      text: "我是嘉兴的，跟前面那位刘哥学过开面符。我不敢说太多。\n你们要找的，刘哥那部手机里，会有一点线索——他记了些东西，没对外说过。\n我是活下来的人。我把话说到这里，剩下的，看你们。" },
   ];
 
   /* ---------- 论坛（开放浏览；无需登录；已知账号仅路遥） ---------- */
@@ -338,9 +338,9 @@ window.HLJQ_DATA = (function () {
       wechat: "badai_ma_luyao",
       name: "巴代路遥",
       realName: "麻红福",
-      birthday: "2006年6月7日",
-      password: "mahongfu麻红福2006年6月7日",
-      note: "密码格式：mahongfu + 真名 + 出生年月日",
+      birthday: "2006年2月26日",
+      password: "2006226",
+      note: "密码 = 出生年＋月＋日（2006年2月26日 → 2006226）。机主不会把答案写脸上。",
     },
     threads: [
       {
@@ -388,7 +388,7 @@ window.HLJQ_DATA = (function () {
         replies: 1,
         posts: [
           { wechat: "tfc_jiacheng",   who: "桐凤斋",   time: "4月6日 15:20",
-            text: "各位前辈。我跟刘哥学过开面符。论坛上有些事我不敢多说。我只能说——属相加上年纪，就是答案。剩下的路，你们自己走。我还活着。" },
+            text: "各位前辈。我跟刘哥学过开面符。论坛上有些事我不敢多说。我只能说——刘哥那部手机里，会有一点线索。剩下的路，你们自己走。我还活着。" },
         ],
       },
     ],

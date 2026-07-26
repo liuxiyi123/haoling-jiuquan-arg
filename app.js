@@ -22,7 +22,7 @@
     clear() { try { localStorage.removeItem(KEY); } catch (e) {} },
   };
   let S = Object.assign(
-    { qa: false, qb: false, qc: false, read: [], wj: [], wjUnread: 0, audio: false, fx: true, bled: [], death: false, truth: false, bkShown: false, shenRead: false, wjProtectDismissed: [], wxTab: "chats" },
+    { qa: false, qb: false, qc: false, read: [], wj: [], wjUnread: 0, audio: false, fx: true, bled: [], death: false, truth: false, bkShown: false, shenRead: false, forumUnlocked: false, shenUnlocked: false, wjProtectDismissed: [], wxTab: "chats" },
     store.load()
   );
 
@@ -327,6 +327,10 @@
         }
         if (personHit) {
           res.innerHTML = personHTML(personKey, personHit);
+          if (S.bkShown && !S.shenUnlocked) {
+            S.shenUnlocked = true; store.save({ shenUnlocked: true });
+            flash(null, "沈某投稿已解锁 · 新闻 / 论坛可见");
+          }
           log("检索人物：" + personKey);
           const isFoe = !!(personHit.foe || (personHit.tag && personHit.tag.indexOf("反派") >= 0));
           if (isFoe) horror(3);
@@ -681,8 +685,10 @@
    *  新闻流（含沈某投稿 → 已阅·继续 触发真相浮窗）
    * ===================================================================== */
   function renderNews() {
+    const shenIdx = (D.NEWS || []).length - 1;
     const items = (D.NEWS || []).map((n, idx) => {
-      const isShen = idx === (D.NEWS.length - 1);
+      if (idx === shenIdx && !S.shenUnlocked) return "";
+      const isShen = idx === shenIdx;
       const continueBtn = isShen
         ? '<div class="news-sentinel"><button class="news-continue" id="shenContinue" type="button">已阅 · 继续 →</button></div>'
         : "";
@@ -774,6 +780,7 @@
    * ===================================================================== */
   function renderForum() {
     const k = D.FORUM.known;
+    const locked = !S.forumUnlocked;
     const knownCard =
       '<div class="forum-known">' +
         '<div class="forum-known-title">已知账号</div>' +
@@ -781,11 +788,18 @@
         '<div class="forum-known-row"><span class="lbl">昵称</span>' + k.name + '</div>' +
         '<div class="forum-known-row"><span class="lbl">真名</span>' + k.realName + '</div>' +
         '<div class="forum-known-row"><span class="lbl">生日</span>' + k.birthday + '</div>' +
-        '<div class="forum-known-row"><span class="lbl">密码</span><code>' + k.password + '</code></div>' +
-        '<div class="forum-known-note muted">' + k.note + '</div>' +
+        '<div class="forum-known-row"><span class="lbl">密码线索</span><code>' + k.note + '</code></div>' +
+        (locked
+          ? '<div class="forum-known-gate">' +
+              '<input id="forumPw" placeholder="输入密码查看帖子" autocomplete="off" />' +
+              '<button id="forumPwGo" type="button">解锁</button>' +
+              '<div class="forum-known-msg muted" id="forumPwMsg"></div>' +
+            '</div>'
+          : '<div class="forum-known-note muted">已解锁 · 帖子可阅</div>') +
       '</div>';
-    const list = (D.FORUM.threads || []).map((t) =>
-      '<div class="forum-thread-item" data-id="' + t.id + '">' +
+    const threads = (D.FORUM.threads || []).filter((t) => S.shenUnlocked || t.authorWechat !== "tfc_jiacheng");
+    const list = threads.map((t) =>
+      '<div class="forum-thread-item' + (locked ? ' locked' : '') + '" data-id="' + t.id + '">' +
         '<div class="forum-thread-title">' + t.title + '</div>' +
         '<div class="forum-thread-meta">' +
           '<span>' + t.author + '</span>' +
@@ -800,26 +814,48 @@
         '<div id="forumThreadHost"></div>' +
       '</div>';
     showPage("论坛 · 同道杂谈", html, () => {
-      document.querySelectorAll(".forum-thread-item").forEach((el) =>
-        el.addEventListener("click", () => {
-          const t = D.FORUM.threads.find((x) => x.id === el.dataset.id);
-          const posts = (t.posts || []).map((p) =>
-            '<div class="forum-post">' +
-              '<div class="forum-post-head"><span class="forum-post-who">' + p.who + '</span><span class="forum-post-time">' + p.time + '</span></div>' +
-              '<div class="forum-post-text">' + p.text + '</div>' +
-            '</div>').join("");
-          $("#forumThreadHost").innerHTML =
-            '<div class="forum-thread-detail">' +
-              '<h4>' + t.title + '</h4>' +
-              '<div class="forum-thread-meta" style="margin-bottom:12px">' +
-                '<span>' + t.author + '</span>' +
-                '<span>' + t.time + '</span>' +
-                '<span>· ' + t.replies + ' 帖</span>' +
-              '</div>' +
-              posts +
-            '</div>';
-          window.scrollTo(0, document.body.scrollHeight);
-        }));
+      if (locked) {
+        const go = document.getElementById("forumPwGo");
+        const inp = document.getElementById("forumPw");
+        const msg = document.getElementById("forumPwMsg");
+        const tryUnlock = () => {
+          const v = (inp.value || "")
+            .replace(/\s+/g, "")
+            .replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0))
+            .toLowerCase();
+          if (v === "2006226") {
+            S.forumUnlocked = true; store.save({ forumUnlocked: true });
+            renderForum();
+          } else {
+            msg.className = "forum-known-msg err"; msg.textContent = "不对。密码在生日里。";
+            horror(2);
+          }
+        };
+        go.onclick = tryUnlock;
+        inp.addEventListener("keydown", (e) => { if (e.key === "Enter") tryUnlock(); });
+      } else {
+        document.querySelectorAll(".forum-thread-item").forEach((el) =>
+          el.addEventListener("click", () => {
+            const t = D.FORUM.threads.find((x) => x.id === el.dataset.id);
+            if (!t) return;
+            const posts = (t.posts || []).map((p) =>
+              '<div class="forum-post">' +
+                '<div class="forum-post-head"><span class="forum-post-who">' + p.who + '</span><span class="forum-post-time">' + p.time + '</span></div>' +
+                '<div class="forum-post-text">' + p.text + '</div>' +
+              '</div>').join("");
+            $("#forumThreadHost").innerHTML =
+              '<div class="forum-thread-detail">' +
+                '<h4>' + t.title + '</h4>' +
+                '<div class="forum-thread-meta" style="margin-bottom:12px">' +
+                  '<span>' + t.author + '</span>' +
+                  '<span>' + t.time + '</span>' +
+                  '<span>· ' + t.replies + ' 帖</span>' +
+                '</div>' +
+                posts +
+              '</div>';
+            window.scrollTo(0, document.body.scrollHeight);
+          }));
+      }
     });
   }
 
